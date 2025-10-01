@@ -6,13 +6,7 @@ LDLIBS := -lboost_system -lpthread
 # Output directory for all build artifacts
 BUILD_DIR := build
 
-SRC := \
-    main.cpp \
-    src/NetworkManager.cpp \
-    src/TcpSession.cpp \
-    src/TcpAcceptor.cpp \
-    src/SpdlogManager.cpp \
-    src/UdpSocket.cpp
+SRC := $(shell find . -type f -name '*.cpp' -not -path './build/*' -printf '%P\n')
 
 # Place object files in the build directory, mirroring source tree
 OBJ := $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRC))
