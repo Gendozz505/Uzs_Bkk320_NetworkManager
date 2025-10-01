@@ -1,11 +1,17 @@
 #include "TcpSession.hpp"
-#include <utility>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <sstream>
+#include <utility>
+
+static std::atomic<uint64_t> nextSessionId_ = 1;
 
 TcpSession::TcpSession(boost::asio::ip::tcp::socket socket)
-    : socket_(std::move(socket)) {
+    : socket_(std::move(socket)), sessionId_(nextSessionId_++) {
+      
   if (!logName_) {
-    logName_ = spdlog::stdout_color_mt("TcpSession");
+    std::ostringstream name;
+    name << "TcpSession[" << sessionId_ << "]";
+    logName_ = spdlog::stdout_color_mt(name.str());
   }
 }
 

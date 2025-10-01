@@ -1,15 +1,19 @@
 #include "UdpSocket.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+static std::atomic<uint64_t> nextSessionId_ = 1;
+
 UdpSocket::UdpSocket(boost::asio::io_context &io,
                      const boost::asio::ip::udp::endpoint &endpoint)
-    : socket_(io), running_(false) {
+    : socket_(io), running_(false), sessionId_(nextSessionId_++) {
   socket_.open(endpoint.protocol());
   socket_.set_option(boost::asio::socket_base::reuse_address(true));
   socket_.bind(endpoint);
 
   if (!logName_) {
-    logName_ = spdlog::stdout_color_mt("UdpSocket");
+    std::ostringstream name;
+    name << "UdpSession[" << sessionId_ << "]";
+    logName_ = spdlog::stdout_color_mt(name.str());
   }
 }
 
@@ -21,7 +25,6 @@ void UdpSocket::startReceive() {
 }
 
 void UdpSocket::stop() {
-  SPDLOG_LOGGER_INFO(logName_, "Socket closing...");
   running_ = false;
   boost::system::error_code ec;
   socket_.close(ec);
@@ -30,6 +33,7 @@ void UdpSocket::stop() {
 void UdpSocket::doReceive() {
   if (!running_)
     return;
+
   socket_.async_receive_from(
       boost::asio::buffer(buffer_), remoteEndpoint_,
       [this](boost::system::error_code ec, std::size_t length) {

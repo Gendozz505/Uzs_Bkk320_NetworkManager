@@ -5,7 +5,12 @@
 #include <string>
 
 SpdlogManager::SpdlogManager(const std::string &logLevel)
-    : logLevel_(logLevel) {}
+    : logLevel_(logLevel) {
+
+  if (!logName_) {
+    logName_ = spdlog::stdout_color_mt("SpdlogManager");
+  }
+}
 
 void SpdlogManager::init() {
 
@@ -23,9 +28,10 @@ void SpdlogManager::init() {
 
   auto it = levelMap.find(logLevel_);
   if (it != levelMap.end()) {
+    SPDLOG_LOGGER_INFO(logName_, "Spdlog level = \"{}\"", logLevel_);
     spdlog::set_level(it->second);
   } else {
+    SPDLOG_LOGGER_WARN(logName_, "Unknown log level '{}', fallback to info", logLevel_);
     spdlog::set_level(spdlog::level::info);
-    spdlog::warn("Unknown log level '{}', fallback to info", logLevel_);
   }
 }

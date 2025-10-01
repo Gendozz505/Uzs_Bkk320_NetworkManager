@@ -23,6 +23,7 @@ private:
   std::array<char, 4096> buffer_{};
   bool running_;
   std::shared_ptr<spdlog::logger> logName_;
+  uint64_t sessionId_;
 };
 
 

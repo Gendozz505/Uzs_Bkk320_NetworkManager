@@ -12,4 +12,5 @@ public:
 
 private:
     std::string logLevel_;
+    std::shared_ptr<spdlog::logger> logName_;
 };
