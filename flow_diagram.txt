@@ -1,0 +1,41 @@
++--------------------+
+|   NetworkManager   |
++--------------------+
+| - io_context_      |
+| - work_guard_      |
+| - threads_         |
++--------------------+
+| + Start()          |
+| + Stop()           |
+| + GetIoContext()   |
++--------------------+
+          |
+          | owns
+          v
++--------------------+     +--------------------+
+|    TcpAcceptor     |     |     UdpSocket      |
++--------------------+     +--------------------+
+| - acceptor_        |     | - socket_          |
+| - endpoint_        |     | - endpoint_        |
++--------------------+     +--------------------+
+| + StartAccept()    |     | + StartReceive()   |
+| + HandleAccept()   |     | + HandleReceive()  |
++--------------------+     | + Send()           |
+          |                +--------------------+
+          | creates
+          v
++--------------------+     +--------------------+
+|     TcpSession     |<----|  MessageHandler    |
++--------------------+     +--------------------+
+| - socket_          |     | + Serialize()      |
+| - buffer_          |     | + Deserialize()    |
++--------------------+     | + Dispatch()       |
+| + StartRead()      |     +--------------------+
+| + HandleRead()     |               ^
+| + Send()           |               | uses
++--------------------+               v
+                            +--------------------+
+                            |  ApplicationLogic  |
+                            +--------------------+
+                            | + ProcessMessage() |
+                            +--------------------+
