@@ -4,15 +4,32 @@
       "name": "linux-gcc-x64",
       "includePath": [
         "${workspaceFolder}/include",
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "/usr/include",
+        "/usr/include/boost",
+        "/usr/include/spdlog"
       ],
       "compilerPath": "/usr/bin/g++",
       "cStandard": "c11",
       "cppStandard": "c++17",
       "intelliSenseMode": "linux-gcc-x64",
       "compilerArgs": [
-        ""
-      ]
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-pthread",
+        "-DSPDLOG_LEVEL=\"debug\""
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}",
+          "/usr/include",
+          "/usr/include/boost",
+          "/usr/include/spdlog"
+        ],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
+      }
     }
   ],
   "version": 4

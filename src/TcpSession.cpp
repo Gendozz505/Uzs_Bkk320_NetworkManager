@@ -8,11 +8,14 @@ static std::atomic<uint64_t> nextSessionId_ = 1;
 TcpSession::TcpSession(boost::asio::ip::tcp::socket socket)
     : socket_(std::move(socket)), sessionId_(nextSessionId_++) {
       
-  if (!logName_) {
     std::ostringstream name;
     name << "TcpSession[" << sessionId_ << "]";
+
+  if (!logName_) {
     logName_ = spdlog::stdout_color_mt(name.str());
   }
+
+  SPDLOG_LOGGER_DEBUG(logName_, "Session started");
 }
 
 void TcpSession::start() { doRead(); }
