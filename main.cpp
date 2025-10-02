@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     acceptor.startAccept();
     udp.startReceive();
 
-    SPDLOG_LOGGER_INFO(logName_, "Echo server listening on port {}...", port);
+    SPDLOG_LOGGER_INFO(logName_, "Server listening on {}:{}", acceptor.getIpAddress(), port);
 
     while (!g_shouldStop) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
