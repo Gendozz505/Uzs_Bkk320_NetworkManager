@@ -1,3 +1,7 @@
 #pragma once
 
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG // Can be overridden by the Makefile
+#include <spdlog/spdlog.h>
+
+#ifndef SPDLOG_LEVEL
+    #define SPDLOG_LEVEL "info" // Can be overridden by the Makefile
+#endif

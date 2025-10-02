@@ -7,7 +7,6 @@
 #include <boost/program_options.hpp>
 #include <csignal>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
 #include <iostream>
 
 namespace po = boost::program_options;
@@ -17,9 +16,6 @@ namespace {
 volatile std::sig_atomic_t g_shouldStop = 0;
 void signalHandler(int) { g_shouldStop = 1; }
 }
-
-static std::shared_ptr<spdlog::logger> logName_ =
-    spdlog::stdout_color_mt("Main");
 
 int main(int argc, char **argv) {
   // Define available options
@@ -67,7 +63,7 @@ int main(int argc, char **argv) {
     acceptor.startAccept();
     udp.startReceive();
 
-    SPDLOG_LOGGER_INFO(logName_, "Server listening on {}:{}", acceptor.getIpAddress(), port);
+    spdlog::info("Server listening on {}:{}", acceptor.getIpAddress(), port);
 
     while (!g_shouldStop) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -76,10 +72,10 @@ int main(int argc, char **argv) {
     acceptor.stop();
     udp.stop();
     net.stop();
-    SPDLOG_LOGGER_INFO(logName_, "Stopped", port);
+    spdlog::info("Stopped", port);
     return 0;
   } catch (const std::exception &ex) {
-    SPDLOG_LOGGER_ERROR(logName_, "{}", ex.what());
+    spdlog::info("{}", ex.what());
     return 1;
   }
 }

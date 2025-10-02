@@ -2,7 +2,6 @@
 
 #include "Common.hpp"
 
-#include <spdlog/spdlog.h>
 #include <string>
 
 class SpdlogManager {
@@ -11,6 +10,5 @@ public:
   void init();
 
 private:
-  int logLevel_;
-  std::shared_ptr<spdlog::logger> logName_;
+  std::string logLevel_;
 };

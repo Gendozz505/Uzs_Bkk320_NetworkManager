@@ -7,16 +7,10 @@ static std::atomic<uint64_t> nextSessionId_ = 1;
 
 TcpSession::TcpSession(boost::asio::ip::tcp::socket socket)
     : socket_(std::move(socket)), sessionId_(nextSessionId_++) {
-
-  if (!logName_) {
-    std::ostringstream name;
-    name << "TcpSession[" << sessionId_ << "]";
-    logName_ = spdlog::stdout_color_mt(name.str());
-  }
 }
 
 void TcpSession::start() {
-  SPDLOG_LOGGER_INFO(logName_, "Session started");
+  spdlog::info("TCP[{}] Session started", sessionId_);
   doRead();
 }
 
@@ -29,11 +23,11 @@ void TcpSession::doRead() {
       [this, self](boost::system::error_code ec, std::size_t length) {
         if (!ec) {
           std::string data(buffer_.data(), length);
-          SPDLOG_LOGGER_INFO(logName_, "Received data: {}", data);
+          spdlog::trace("TCP[{}] RX: {}", sessionId_, data);
           // TODO: Process the received data
           doRead();
         } else {
-          SPDLOG_LOGGER_INFO(logName_, "{}", ec.message());
+          spdlog::info("TCP[{}] {}", sessionId_, ec.message());
           self->socket_.close();
         }
       });
@@ -45,7 +39,7 @@ void TcpSession::doWrite(std::string message) {
       socket_, boost::asio::buffer(message),
       [this, self](boost::system::error_code ec, std::size_t /*length*/) {
         if (ec) {
-          spdlog::error("{}", ec.message());
+          spdlog::info("TCP[{}] {}", sessionId_, ec.message());
           self->socket_.close();
         }
       });

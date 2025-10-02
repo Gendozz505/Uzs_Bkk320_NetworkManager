@@ -5,7 +5,6 @@
 #include <boost/asio.hpp>
 #include <array>
 #include <vector>
-#include <spdlog/spdlog.h>
 
 class UdpSocket {
 public:
@@ -24,7 +23,6 @@ private:
   boost::asio::ip::udp::endpoint remoteEndpoint_;
   std::array<char, 4096> buffer_{};
   bool running_;
-  std::shared_ptr<spdlog::logger> logName_;
   uint64_t sessionId_;
 };
 

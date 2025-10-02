@@ -8,10 +8,6 @@ TcpAcceptor::TcpAcceptor(boost::asio::io_context& io, const boost::asio::ip::tcp
     acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen(boost::asio::socket_base::max_listen_connections);
-
-    if (!logName_) {
-      logName_ = spdlog::stdout_color_mt("TcpAcceptor");
-    }
 }
 
 void TcpAcceptor::startAccept() {

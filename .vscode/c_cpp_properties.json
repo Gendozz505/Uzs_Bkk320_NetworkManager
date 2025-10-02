@@ -17,7 +17,7 @@
         "-Wall",
         "-Wextra",
         "-pthread",
-        "-DSPDLOG_LEVEL=\"debug\""
+        "-DSPDLOG_LEVEL=\"trace\""
       ],
       "browse": {
         "path": [

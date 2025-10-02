@@ -3,7 +3,6 @@
 #include "Common.hpp"
 
 #include <boost/asio.hpp>
-#include <spdlog/spdlog.h>
 #include <memory>
 
 class TcpAcceptor {
@@ -21,7 +20,6 @@ private:
 private:
     boost::asio::ip::tcp::acceptor acceptor_;
     bool running_;
-    std::shared_ptr<spdlog::logger> logName_;
 };
 
 

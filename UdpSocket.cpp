@@ -9,12 +9,6 @@ UdpSocket::UdpSocket(boost::asio::io_context &io,
   socket_.open(endpoint.protocol());
   socket_.set_option(boost::asio::socket_base::reuse_address(true));
   socket_.bind(endpoint);
-
-  if (!logName_) {
-    std::ostringstream name;
-    name << "UdpSession[" << sessionId_ << "]";
-    logName_ = spdlog::stdout_color_mt(name.str());
-  }
 }
 
 void UdpSocket::startReceive() {
@@ -39,7 +33,7 @@ void UdpSocket::doReceive() {
       [this](boost::system::error_code ec, std::size_t length) {
         if (!ec && length > 0) {
           std::string data(buffer_.data(), length);
-          SPDLOG_LOGGER_INFO(logName_, "Received data: {}", data);
+          spdlog::trace("[UDP] Received data: {}", data);
           // TODO: Process the received data
         } else if (ec) {
           stop();

@@ -3,10 +3,6 @@
 
 NetworkManager::NetworkManager(std::size_t numThreads)
     : workGuard_(), numThreads_(numThreads == 0 ? 1 : numThreads) {
-
-  if (!logName_) {
-    logName_ = spdlog::stdout_color_mt("NetworkManager");
-  }
 }
 
 NetworkManager::~NetworkManager() { stop(); }

@@ -6,7 +6,6 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <spdlog/spdlog.h>
 
 class TcpSession : public std::enable_shared_from_this<TcpSession> {
 public:
@@ -22,7 +21,6 @@ private:
 private:
     boost::asio::ip::tcp::socket socket_;
     std::array<char, 4096> buffer_{};
-    std::shared_ptr<spdlog::logger> logName_;
     uint64_t sessionId_;
 };
 

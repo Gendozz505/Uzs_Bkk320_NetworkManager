@@ -3,7 +3,6 @@
 #include "Common.hpp"
 
 #include <boost/asio.hpp>
-#include <spdlog/spdlog.h>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -27,7 +26,6 @@ private:
     std::unique_ptr<WorkGuard> workGuard_;
     std::vector<std::thread> threads_;
     std::size_t numThreads_;
-    std::shared_ptr<spdlog::logger> logName_;
 };
 
 

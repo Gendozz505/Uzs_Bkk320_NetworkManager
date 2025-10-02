@@ -1,11 +1,11 @@
 # Compiler and flags for host build
 HOST_CXX := g++
-HOST_CXXFLAGS := -g -O0 -std=c++17 -Wall -Wextra -Wpedantic -pthread -Iinclude -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG
+HOST_CXXFLAGS := -g -O0 -std=c++17 -pthread -Iinclude -DSPDLOG_LEVEL=\"trace\"
 HOST_LDLIBS := -lboost_system -lboost_program_options -lpthread
 
 # Compiler and flags for target (ARM64) build
 TARGET_CXX := arm-linux-gnueabihf-g++
-TARGET_CXXFLAGS := -O2 -std=c++17 --sysroot ~/Git-projects/sysrootU20 -Wno-psabi -Wformat -Iinclude -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
+TARGET_CXXFLAGS := -O2 -std=c++17 --sysroot ~/Git-projects/sysrootU20 -Wno-psabi -Wformat -Iinclude -DSPDLOG_LEVEL=\"info\"
 TARGET_LDFLAGS := -static
 TARGET_LDLIBS := -lboost_system -lboost_program_options -lpthread
 
