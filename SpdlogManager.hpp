@@ -1,16 +1,16 @@
 #pragma once
 
-#include <string>
-#include <spdlog/spdlog.h>
+#include "Common.hpp"
 
-#define SPDLOG_LEVEL "debug" // Can be overridden by the Makefile
+#include <spdlog/spdlog.h>
+#include <string>
 
 class SpdlogManager {
 public:
-  SpdlogManager(const std::string& logLevel);
+  SpdlogManager();
   void init();
 
 private:
-    std::string logLevel_;
-    std::shared_ptr<spdlog::logger> logName_;
+  int logLevel_;
+  std::shared_ptr<spdlog::logger> logName_;
 };

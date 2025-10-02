@@ -29,7 +29,7 @@ void TcpSession::doRead() {
       [this, self](boost::system::error_code ec, std::size_t length) {
         if (!ec) {
           std::string data(buffer_.data(), length);
-          SPDLOG_LOGGER_DEBUG(logName_, "Received data: {}", data);
+          SPDLOG_LOGGER_INFO(logName_, "Received data: {}", data);
           // TODO: Process the received data
           doRead();
         } else {

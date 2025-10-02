@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Common.hpp"
+
 #include <boost/asio.hpp>
 #include <array>
 #include <memory>

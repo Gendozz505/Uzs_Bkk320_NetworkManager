@@ -39,7 +39,7 @@ void UdpSocket::doReceive() {
       [this](boost::system::error_code ec, std::size_t length) {
         if (!ec && length > 0) {
           std::string data(buffer_.data(), length);
-          SPDLOG_LOGGER_DEBUG(logName_, "Received data: {}", data);
+          SPDLOG_LOGGER_INFO(logName_, "Received data: {}", data);
           // TODO: Process the received data
         } else if (ec) {
           stop();

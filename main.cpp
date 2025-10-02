@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
   std::signal(SIGTERM, signalHandler);
 
   try {
-    SpdlogManager spdlogManager(SPDLOG_LEVEL);
+    SpdlogManager spdlog;
 
     NetworkManager net(std::max(1u, std::thread::hardware_concurrency()));
     auto &io = net.getIoContext();
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
     UdpSocket udp(io, uep);
 
-    spdlogManager.init();
+    spdlog.init();
     net.start();
     acceptor.startAccept();
     udp.startReceive();
