@@ -12,8 +12,6 @@ public:
     void startAccept();
     void stop();
 
-    std::string getIpAddress();
-
 private:
     void doAccept();
 

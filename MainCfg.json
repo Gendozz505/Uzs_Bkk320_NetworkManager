@@ -1,0 +1,96 @@
+{
+     "this":{"ver":[1,3], "name":"maincfg"}
+     , "SerNumb":13462
+     , "CryptoProtocol":true 
+     , "AGroups":{"1":1 }
+     , "TimeSlotDuration":1000
+     , "sdcard":{"use":1, "dir_phono":"/dev/mmcblk1p1", "device":"/dev/mmcblk1p1", "mount_point":"/mnt/mmcblk1p1", "label":"MMCBYSENSOR"}
+     , "device_ready":{"use":0, "readytimeout":4000}
+     , "timeout_x28":{"use":1, "timeout":15}
+     ,"audio_card_0" : 
+     {
+              "codec":"Codec"
+               , "codecname" : "H3 Audio Codec"
+               , "devname_plug":"plughw:0,0"
+               , "devname":"hw:0"
+	       , "play_mic_rate":44100
+	       , "vol_lineout2":95
+	       , "vol_lineout":95
+	       , "vol_dac":100
+	       , "speak_type":2
+	       , "speak_val":5
+	       , "speak_resampler":0
+     }
+     ,"audio_card_max98089" : 
+     {
+         "codec":"nanopimax98089"
+         , "codecname" : "nanopi-max98089"
+         , "devname":"plughw:1,0"
+         , "mic1":{"devname":"hw:1", "enable_name":"Right ADC Mixer MIC1 Switch", "vol_name":"MIC1 Volume", "vol_boost_name":"MIC1 Boost Volume", "vol":0, "vol_boost":0, "mic_rate":44100}
+         , "mic2":{"devname":"hw:1", "enable_name":"Right ADC Mixer MIC2 Switch", "vol_name":"MIC2 Volume", "vol_boost_name":"MIC2 Boost Volume", "vol":25, "vol_boost":0, "mic_rate":44100}
+         , "speak_type":0
+	 , "speak_val":0
+         , "speak_resampler":0
+      }
+    , "pur": {"devname":"/dev/ttyUSB0"}
+    , "gpio": {"devname":"/dev/gpiochip0", "mic_line":17, "audio_line":201}
+    , "accumulator":{"buse":false}
+    , "Zond": {"Mask2Disable":0, "Enabled":false, "SelfTestPeriod":600}
+    , "Grd": {"Enabled":false, "Type":1}
+    , "SessUninterruptedTime":0
+    , "NoSndPcktsTime": 86400
+    , "TimeWhenSessCanbeInterruptedByAnyone": 600
+    , "Time2InterprCompletedSeans": 900
+  ,  "SessHistItemLifeTime":900
+  , "FailOnBreak":false
+  , "SirenFileNumber":1
+  , "DefZoneMask" : 3
+  ,  "Pos":{
+      "0": {"turnedon":1  },
+      "1": {"turnedon":1  },
+      "2": {"turnedon":1  },
+      "3": {"turnedon":1  }
+    },
+    "Relay": {
+      "0": {
+        "events": {
+		"init":{"v":0, "use":1}
+		, "zond":{"v":1, "use":1}
+		, "grd":{"v":1, "use":1}
+		, "mic2":{"v":1, "use":1}
+		, "micpur":{"v":1, "use":1}
+		, "sirena":{"v":1, "use":1}
+		, "speak":{"v":1, "use":1}
+		, "fail":{"v":0, "use":0}
+		, "bkk_open":{"v":0, "use":0}
+	  }
+      },
+      "1": {
+        "events": { 
+		"init":{"v":0, "use":1}
+		, "zond":{"v":0, "use":0}
+		, "grd":{"v":0, "use":0}
+		, "mic2":{"v":0, "use":0}
+		, "micpur":{"v":0, "use":0}
+		, "sirena":{"v":0, "use":0}
+		, "speak":{"v":0, "use":0}
+		, "fail":{"v":0, "use":0}
+		, "bkk_open":{"v":0, "use":0}
+	}
+      }
+    },
+    "gpiox4":
+      {
+        "0":{"use":0, "event":"POS", "value":0, "grp":0, "device":0, "readytimeout":4000}
+        , "1":{"use":0, "event":"OS", "value":0, "grp":0, "device":0, "readytimeout":4000}
+        , "2":{"use":0, "event":"", "value":1, "grp":0, "device":0, "readytimeout":4000}
+        , "3":{"use":0, "event":"", "value":0, "grp":0, "device":0, "readytimeout":4000}
+        , "help":"events: AccAc, AccAcr,  Acccom, AC_On, POS, OS."
+        , "reverse_bits":false
+      }
+      , "args":[
+          [0, 1]
+	  , [2, 3]
+      ]
+}
+

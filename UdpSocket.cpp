@@ -1,5 +1,8 @@
 #include "UdpSocket.hpp"
+#include "MessageManager.hpp"
+#include "MessageParser.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 static std::atomic<uint64_t> nextSessionId_ = 1;
 
@@ -15,16 +18,19 @@ void UdpSocket::startReceive() {
   if (running_)
     return;
   running_ = true;
-  doReceive();
+  doReceive_();
 }
 
 void UdpSocket::stop() {
   running_ = false;
   boost::system::error_code ec;
   socket_.close(ec);
+  if (ec) {
+    spdlog::warn("[UDP] Error closing socket: {}", ec.message());
+  }
 }
 
-void UdpSocket::doReceive() {
+void UdpSocket::doReceive_() {
   if (!running_)
     return;
 
@@ -32,20 +38,65 @@ void UdpSocket::doReceive() {
       boost::asio::buffer(buffer_), remoteEndpoint_,
       [this](boost::system::error_code ec, std::size_t length) {
         if (!ec && length > 0) {
-          std::string data(buffer_.data(), length);
-          spdlog::trace("[UDP] Received data: {}", data);
-          // TODO: Process the received data
+          // Convert received data to vector for parser
+          std::vector<uint8_t> dataVector(buffer_.begin(),
+                                          buffer_.begin() + length);
+
+          spdlog::trace("[UDP] Received {} bytes: {}", dataVector.size(),
+                        u8BytesToHex(dataVector.data(), dataVector.size()));
+
+          // Emit signal to parser
+          udpMessageReceived(dataVector);
+
         } else if (ec) {
           stop();
         }
-        doReceive();
+        doReceive_();
       });
 }
 
-void UdpSocket::doSend(std::size_t length) {
+void UdpSocket::doSend_(std::size_t length) {
   socket_.async_send_to(
       boost::asio::buffer(buffer_.data(), length), remoteEndpoint_,
       [this](boost::system::error_code /*ec*/, std::size_t /*bytes*/) {
         // no-op
       });
+}
+
+void UdpSocket::sendMessage(const NetMessage &message) {
+  // Serialize NetMessage to buffer
+  size_t offset = 0;
+
+  // CMD
+  buffer_[offset++] = message.cmd;
+
+  // Serial Number
+  buffer_[offset++] = (message.serialNumber >> 8) & 0xFF;
+  buffer_[offset++] = message.serialNumber & 0xFF;
+
+  // Status
+  buffer_[offset++] = message.status;
+
+  // Data Length
+  buffer_[offset++] = (message.dataLen >> 24) & 0xFF;
+  buffer_[offset++] = (message.dataLen >> 16) & 0xFF;
+  buffer_[offset++] = (message.dataLen >> 8) & 0xFF;
+  buffer_[offset++] = message.dataLen & 0xFF;
+
+  // Payload
+  if (message.payload.size() <= buffer_.size() - offset - 2) {
+    for (int i = (message.payload.size() - 1); i >= 0; i--) {
+      buffer_[offset++] = message.payload[i];
+    }
+  } else {
+    spdlog::error("[UDP] Message too large to send");
+    return;
+  }
+
+  // CRC16
+  buffer_[offset++] = (message.crc >> 8) & 0xFF;
+  buffer_[offset++] = message.crc & 0xFF;
+
+  spdlog::trace("[UDP] Sending {} bytes", offset);
+  doSend_(offset);
 }

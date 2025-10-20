@@ -1,3 +1,5 @@
+#include "MessageManager.hpp"
+#include "MessageParser.hpp"
 #include "NetworkManager.hpp"
 #include "SpdlogManager.hpp"
 #include "TcpAcceptor.hpp"
@@ -6,8 +8,9 @@
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
 #include <csignal>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <iostream>
+#include <memory>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace po = boost::program_options;
 namespace net = boost::asio;
@@ -15,7 +18,7 @@ namespace net = boost::asio;
 namespace {
 volatile std::sig_atomic_t g_shouldStop = 0;
 void signalHandler(int) { g_shouldStop = 1; }
-}
+} // namespace
 
 int main(int argc, char **argv) {
   // Define available options
@@ -56,14 +59,34 @@ int main(int argc, char **argv) {
     TcpAcceptor acceptor(io, ep);
 
     net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
+
     UdpSocket udp(io, uep);
+    MessageParser parser;
+    MessageManager messageManager;
+
+    // Connect parser signals to message manager
+    parser.messageParsed.connect([&messageManager](const NetMessage &message) {
+      messageManager.processMessage(message);
+    });
+
+    // Connect UDP socket's udpMessageReceived signal to parser's parseData
+    // method
+    udp.udpMessageReceived.connect(
+        [&parser](const std::vector<uint8_t> &message) {
+          parser.parseData(message);
+        });
+
+    // Connect message manager's sendUdpMessage signal to UDP socket's
+    // sendMessage method
+    messageManager.sendUdpMessage.connect(
+        [&udp](const NetMessage &message) { udp.sendMessage(message); });
 
     spdlog.init();
     net.start();
     acceptor.startAccept();
     udp.startReceive();
 
-    spdlog::info("Server listening on {}:{}", acceptor.getIpAddress(), port);
+    spdlog::info("Server listening on {}:{}", getIpAddress(), port);
 
     while (!g_shouldStop) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));

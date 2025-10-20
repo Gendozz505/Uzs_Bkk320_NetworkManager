@@ -3,20 +3,32 @@
 #include "Common.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/signals2.hpp>
 #include <array>
-#include <vector>
+#include <memory>
+
+// Forward declarations
+class MessageParser;
+class MessageManager;
+struct NetMessage;
 
 class UdpSocket {
 public:
+  // Signal emitted when a udp message is received
+  boost::signals2::signal<void(const std::vector<uint8_t>&)> udpMessageReceived;
+
   UdpSocket(boost::asio::io_context &io,
             const boost::asio::ip::udp::endpoint &endpoint);
 
   void startReceive();
   void stop();
+  
+  // Set parser and message manager
+  void sendMessage(const NetMessage& message);
 
 private:
-  void doReceive();
-  void doSend(std::size_t length);
+  void doReceive_();
+  void doSend_(std::size_t length);
 
 private:
   boost::asio::ip::udp::socket socket_;
