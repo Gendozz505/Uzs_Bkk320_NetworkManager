@@ -59,8 +59,8 @@ int main(int argc, char **argv) {
     TcpAcceptor acceptor(io, ep);
 
     net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
-
     UdpSocket udp(io, uep);
+
     MessageParser parser;
     MessageManager messageManager;
 
