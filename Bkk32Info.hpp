@@ -12,24 +12,25 @@
 
 using json = nlohmann::json;
 
+namespace Bkk32Info {
 inline uint16_t getSerialNumber() {
-    try {    
-        json j;
-        int serialNumber;
-    
-        std::ifstream file(BKK32_MAIN_CFG_FILE);
-        if (!file.is_open()) {
-            throw std::runtime_error("Failed to open file");
-        }
-    
-        file >> j;
-    
-        serialNumber = j["SerNumb"];
+  try {
+    json j;
+    int serialNumber;
 
-        return serialNumber;
-    } catch (const std::exception& e) {
-        spdlog::error("[Bkk32Info] Failed to get serial number: {}", e.what());
-        return 0;
+    std::ifstream file(BKK32_MAIN_CFG_FILE);
+    if (!file.is_open()) {
+      throw std::runtime_error("Failed to open file");
     }
 
+    file >> j;
+
+    serialNumber = j["SerNumb"];
+
+    return serialNumber;
+  } catch (const std::exception &e) {
+    spdlog::error("[Bkk32Info] Failed to get serial number: {}", e.what());
+    return 0;
+  }
 }
+} // namespace Bkk320Info

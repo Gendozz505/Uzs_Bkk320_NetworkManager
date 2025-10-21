@@ -12,7 +12,7 @@
 MessageManager::MessageManager() {
 }
 
-void MessageManager::processMessage(const NetMessage &message) {
+void MessageManager::processMessage(const Common::NetMessage &message) {
   try {
     validateMessage_(message);
     processCommand_(message);
@@ -27,14 +27,14 @@ void MessageManager::handleParseError(const std::string &error) {
   spdlog::error("[MessageManager] Parse error: {}", error);
 }
 
-void MessageManager::validateMessage_(const NetMessage &message) {
+void MessageManager::validateMessage_(const Common::NetMessage &message) {
   // Basic validation checks
   if (message.dataLen != message.payload.size()) {
     throw std::runtime_error("Data length mismatch");
   }
 }
 
-void MessageManager::processCommand_(const NetMessage &message) {
+void MessageManager::processCommand_(const Common::NetMessage &message) {
   switch (message.cmd) {
   case CMD_IP_REQUEST: {
     ipRequestHandler_(message);
@@ -47,13 +47,13 @@ void MessageManager::processCommand_(const NetMessage &message) {
   }
 }
 
-void MessageManager::ipRequestHandler_(const NetMessage &message) {
+void MessageManager::ipRequestHandler_(const Common::NetMessage &message) {
   spdlog::debug("[MessageManager] Processing IP request");
 
   // Validate network configuration
-  std::string ipAddress = getIpAddress();
-  std::string mask = getMask();
-  uint16_t serialNumber = getSerialNumber();
+  std::string ipAddress = Common::getIpAddress();
+  std::string mask = Common::getMask();
+  uint16_t serialNumber = Bkk32Info::getSerialNumber();
 
   // Prepare response message
   uint8_t status = 0x00;
@@ -94,7 +94,7 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   offset += payloadString.size();
 
   // Calculate CRC16 for all data except CRC field itself
-  uint16_t crc = calculateCRC16(pBuffer, offset);
+  uint16_t crc = Common::calculateCRC16(pBuffer, offset);
 
   // CRC16
   pBuffer[offset++] = static_cast<uint8_t>(crc & 0xFF);       

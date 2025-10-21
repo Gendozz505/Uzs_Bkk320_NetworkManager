@@ -12,15 +12,13 @@ void MessageParser::parseData(const std::vector<uint8_t> &data) {
   }
 
   try {
-    NetMessage message = parseMessage_(data);
+    Common::NetMessage message = parseMessage_(data);
 
     if (validateMessage_(message, data)) {
       spdlog::trace(
-          "[MessageParser] Valid message parsed - CMD: {}, SERIAL NUMBER: {}, "
-          "STATUS: {}, DATALEN: {}, PAYLOAD: {}",
-          u8ScalarToHex(message.cmd, 1), message.serialNumber,
-          u8ScalarToHex(message.status, 1), message.dataLen,
-          u8BytesToHex(message.payload.data(), message.payload.size()));
+          "[MessageParser] Valid message parsed - CMD: {:#x}, SERIAL NUMBER: {}, STATUS: {:#x}, DATALEN: {}, PAYLOAD: {}",
+          message.cmd, message.serialNumber, message.status, message.dataLen,
+          Common::u8BytesToHex(message.payload.data(), message.payload.size()));
 
       messageParsed(message);
     } else {
@@ -31,8 +29,9 @@ void MessageParser::parseData(const std::vector<uint8_t> &data) {
   }
 }
 
-NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
-  NetMessage message;
+Common::NetMessage
+MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
+  Common::NetMessage message;
   size_t offset = 0;
 
   // Parse CMD
@@ -67,7 +66,7 @@ NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
   return message;
 }
 
-bool MessageParser::validateMessage_(const NetMessage &message,
+bool MessageParser::validateMessage_(const Common::NetMessage &message,
                                      const std::vector<uint8_t> &rawData) {
   // Check if the message structure is valid
   if (rawData.size() < MESSAGE_MIN_SIZE + message.dataLen) {
@@ -75,8 +74,8 @@ bool MessageParser::validateMessage_(const NetMessage &message,
     return false;
   }
 
-  uint16_t calculatedCrc =
-      calculateCRC16(rawData.data(), rawData.size() - sizeof(NetMessage::crc));
+  uint16_t calculatedCrc = Common::calculateCRC16(
+      rawData.data(), rawData.size() - sizeof(Common::NetMessage::crc));
 
   if (calculatedCrc != message.crc) {
     spdlog::warn(

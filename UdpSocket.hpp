@@ -7,11 +7,6 @@
 #include <array>
 #include <memory>
 
-// Forward declarations
-class MessageParser;
-class MessageManager;
-struct NetMessage;
-
 class UdpSocket {
 public:
   // Signal emitted when a udp message is received

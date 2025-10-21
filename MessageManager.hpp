@@ -12,13 +12,13 @@ public:
   ~MessageManager() = default;
 
   // Process incoming message
-  void processMessage(const NetMessage &message);
+  void processMessage(const Common::NetMessage &message);
 
 private:
   void handleParseError(const std::string &error);
 
   // Message processing logic
-  void processCommand_(const NetMessage &message);
-  void ipRequestHandler_(const NetMessage &message);
-  void validateMessage_(const NetMessage &message);
+  void processCommand_(const Common::NetMessage &message);
+  void ipRequestHandler_(const Common::NetMessage &message);
+  void validateMessage_(const Common::NetMessage &message);
 };

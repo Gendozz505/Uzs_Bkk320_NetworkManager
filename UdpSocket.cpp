@@ -42,7 +42,7 @@ void UdpSocket::doReceive_() {
                                           buffer_.begin() + length);
 
           spdlog::trace("[UDP] Received {} bytes: {}", dataVector.size(),
-                        u8BytesToHex(dataVector.data(), dataVector.size()));
+          Common::u8BytesToHex(dataVector.data(), dataVector.size()));
 
           // Emit signal to parser
           udpMessageReceived(dataVector);
@@ -70,7 +70,7 @@ void UdpSocket::sendMessage(const std::vector<uint8_t> &buffer) {
   }
   
   std::copy(buffer.begin(), buffer.end(), buffer_.begin());
-  spdlog::trace("[UDP] Sending {} bytes, {}", buffer.size(), u8BytesToHex(buffer.data(), buffer.size()));
+  spdlog::trace("[UDP] Sending {} bytes, {}", buffer.size(), Common::u8BytesToHex(buffer.data(), buffer.size()));
 
   doSend_(buffer.size());
 }
