@@ -89,6 +89,27 @@ inline std::string getMask() {
     return "";
   }
 
+  for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == nullptr)
+      continue;
+
+    if (ifa->ifa_addr->sa_family == AF_INET) {
+      int s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host,
+                          NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
+      if (s == 0 && strcmp(host, "127.0.0.1") != 0) {
+        // Found the non-loopback interface, now get its netmask
+        if (ifa->ifa_netmask != nullptr && ifa->ifa_netmask->sa_family == AF_INET) {
+          int mask_s = getnameinfo(ifa->ifa_netmask, sizeof(struct sockaddr_in), host,
+                                  NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
+          if (mask_s == 0) {
+            mask = host;
+            break;
+          }
+        }
+      }
+    }
+  }
+
   freeifaddrs(ifaddr);
   return mask;
 }
