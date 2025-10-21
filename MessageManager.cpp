@@ -110,8 +110,8 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   uint16_t crc = calculateCRC16(pBuffer, offset);
 
   // CRC16 (2 bytes, little endian)
-  pBuffer[offset++] = static_cast<uint8_t>(crc & 0xFF);       
   pBuffer[offset++] = static_cast<uint8_t>((crc >> 8) & 0xFF);
+  pBuffer[offset++] = static_cast<uint8_t>(crc & 0xFF);       
 
   // Signal the message is ready to be sent via UDP
   sendUdpMessage(buffer);
