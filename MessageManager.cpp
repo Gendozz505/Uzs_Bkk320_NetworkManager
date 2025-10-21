@@ -76,9 +76,9 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   // CMD
   pBuffer[offset++] = CMD_IP_RESPONSE;
 
-  // Serial Number (2 bytes, little endian)
+  // Serial Number
   pBuffer[offset++] = static_cast<uint8_t>(serialNumber & 0xFF);
-  pBuffer[offset++] = static_cast<uint8_t>((serialNumber >> 8) & 0xFF); // MSB second
+  pBuffer[offset++] = static_cast<uint8_t>((serialNumber >> 8) & 0xFF);
 
   // Status
   pBuffer[offset++] = status;
