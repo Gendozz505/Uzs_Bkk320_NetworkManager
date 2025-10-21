@@ -24,7 +24,7 @@ public:
   void stop();
   
   // Set parser and message manager
-  void sendMessage(const NetMessage& message);
+  void sendMessage(const std::vector<uint8_t> &buffer);
 
 private:
   void doReceive_();

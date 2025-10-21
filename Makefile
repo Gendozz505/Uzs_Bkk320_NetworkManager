@@ -1,13 +1,14 @@
 # Compiler and flags for host build
 HOST_CXX := g++
 HOST_CXXFLAGS := -g -O0 -std=c++17 -pthread -Iinclude -DSPDLOG_LEVEL=\"trace\"
-HOST_LDLIBS := -lboost_system -lboost_program_options -lpthread
+HOST_LDFLAGS := -L/usr/local/lib
+HOST_LDLIBS := -lboost_system -lboost_program_options -lboost_thread -lfmt -lpthread
 
 # Compiler and flags for target (ARM64) build
 TARGET_CXX := arm-linux-gnueabihf-g++
 TARGET_CXXFLAGS := -O2 -std=c++17 --sysroot ~/Git-projects/sysrootU20 -Wno-psabi -Wformat -Iinclude -DSPDLOG_LEVEL=\"info\"
 TARGET_LDFLAGS := -static
-TARGET_LDLIBS := -lboost_system -lboost_program_options -lpthread
+TARGET_LDLIBS := -lboost_system -lboost_program_options -lboost_thread -lfmt -lpthread
 
 # Output directories for build artifacts
 HOST_BUILD_DIR := build/host
@@ -34,7 +35,7 @@ all: host
 host: $(HOST_BIN)
 $(HOST_BIN): $(HOST_OBJ)
 	@mkdir -p $(dir $@)
-	$(HOST_CXX) $(HOST_CXXFLAGS) -o $@ $^ $(HOST_LDLIBS)
+	$(HOST_CXX) $(HOST_CXXFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
 $(HOST_OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)

@@ -1,6 +1,8 @@
 #include "UdpSocket.hpp"
 #include "MessageManager.hpp"
 #include "MessageParser.hpp"
+#include "Common.hpp"
+#include <cstdint>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -63,40 +65,15 @@ void UdpSocket::doSend_(std::size_t length) {
       });
 }
 
-void UdpSocket::sendMessage(const NetMessage &message) {
-  // Serialize NetMessage to buffer
-  size_t offset = 0;
+void UdpSocket::sendMessage(const std::vector<uint8_t> &buffer) {
 
-  // CMD
-  buffer_[offset++] = message.cmd;
-
-  // Serial Number
-  buffer_[offset++] = (message.serialNumber >> 8) & 0xFF;
-  buffer_[offset++] = message.serialNumber & 0xFF;
-
-  // Status
-  buffer_[offset++] = message.status;
-
-  // Data Length
-  buffer_[offset++] = (message.dataLen >> 24) & 0xFF;
-  buffer_[offset++] = (message.dataLen >> 16) & 0xFF;
-  buffer_[offset++] = (message.dataLen >> 8) & 0xFF;
-  buffer_[offset++] = message.dataLen & 0xFF;
-
-  // Payload
-  if (message.payload.size() <= buffer_.size() - offset - 2) {
-    for (int i = (message.payload.size() - 1); i >= 0; i--) {
-      buffer_[offset++] = message.payload[i];
-    }
-  } else {
+  if (buffer.size() > buffer_.size()) {
     spdlog::error("[UDP] Message too large to send");
     return;
   }
+  
+  std::copy(buffer.begin(), buffer.end(), buffer_.begin());
+  spdlog::trace("[UDP] Sending {} bytes, {}", buffer.size(), u8BytesToHex(buffer.data(), buffer.size()));
 
-  // CRC16
-  buffer_[offset++] = (message.crc >> 8) & 0xFF;
-  buffer_[offset++] = message.crc & 0xFF;
-
-  spdlog::trace("[UDP] Sending {} bytes", offset);
-  doSend_(offset);
+  doSend_(buffer.size());
 }

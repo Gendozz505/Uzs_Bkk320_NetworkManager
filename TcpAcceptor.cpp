@@ -32,9 +32,3 @@ void TcpAcceptor::doAccept() {
             doAccept();
         });
 }
-
-std::string TcpAcceptor::getIpAddress() {
-    // Get the bound IP address
-    auto endpoint = acceptor_.local_endpoint();
-    return endpoint.address().to_string();
-}

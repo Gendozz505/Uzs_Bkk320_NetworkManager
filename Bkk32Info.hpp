@@ -8,14 +8,15 @@
 #include "Common.hpp"
 
 // #define BKK32_MAIN_CFG_FILE "/opt/Sensor-M/Bkk320/etc/MainCfg.json"
-#define BKK32_MAIN_CFG_FILE "/home/genadi/Uzs_Bkk320_NetworkManager/MainCfg.json"
+// #define BKK32_MAIN_CFG_FILE "/home/genadi/Uzs_Bkk320_NetworkManager/MainCfg.json"
+#define BKK32_MAIN_CFG_FILE "/home/genadi/Projects/Uzs_Bkk320_NetworkManager/Uzs_Bkk320_NetworkManager/MainCfg.json"
 
 using json = nlohmann::json;
 
 inline uint16_t getSerialNumber() {
     try {    
         json j;
-        uint16_t serialNumber;
+        int serialNumber;
     
         std::ifstream file(BKK32_MAIN_CFG_FILE);
         if (!file.is_open()) {

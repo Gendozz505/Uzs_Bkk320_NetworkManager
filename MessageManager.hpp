@@ -1,13 +1,12 @@
 #pragma once
 
-#include "MessageParser.hpp"
+#include "Common.hpp"
 #include <boost/signals2.hpp>
-#include <memory>
 
 class MessageManager {
 public:
   // Signal to send UDP message
-  boost::signals2::signal<void(const NetMessage &)> sendUdpMessage;
+  boost::signals2::signal<void(const std::vector<uint8_t> &)> sendUdpMessage;
 
   MessageManager();
   ~MessageManager() = default;

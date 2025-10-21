@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/crc.hpp>
-#include <fstream>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <spdlog/spdlog.h>
@@ -134,5 +133,11 @@ inline uint16_t calculateCRC16(const NetMessage &message) {
   crc_calculator.process_bytes(&message.status, 1);
   crc_calculator.process_bytes(&message.dataLen, 4);
   crc_calculator.process_bytes(message.payload.data(), message.payload.size());
+  return static_cast<uint16_t>(crc_calculator.checksum());
+}
+
+inline uint16_t calculateCRC16(const uint8_t *data, size_t size) {
+  boost::crc_optimal<16, 0x1021, 0xFFFF, 0, true, true> crc_calculator;
+  crc_calculator.process_bytes(data, size);
   return static_cast<uint16_t>(crc_calculator.checksum());
 }

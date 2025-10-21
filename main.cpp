@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     // Connect message manager's sendUdpMessage signal to UDP socket's
     // sendMessage method
     messageManager.sendUdpMessage.connect(
-        [&udp](const NetMessage &message) { udp.sendMessage(message); });
+        [&udp](const std::vector<uint8_t> &buffer) { udp.sendMessage(buffer); });
 
     spdlog.init();
     net.start();
