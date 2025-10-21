@@ -1,5 +1,4 @@
 #include "NetworkManager.hpp"
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 NetworkManager::NetworkManager(std::size_t numThreads)
     : workGuard_(), numThreads_(numThreads == 0 ? 1 : numThreads) {

@@ -10,7 +10,6 @@
 #define CMD_IP_RESPONSE 0xF7
 
 MessageManager::MessageManager() {
-  spdlog::debug("[MessageManager] Initialized");
 }
 
 void MessageManager::processMessage(const NetMessage &message) {

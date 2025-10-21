@@ -1,6 +1,4 @@
 #include "SpdlogManager.hpp"
-#include <fstream>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <string>
 
 SpdlogManager::SpdlogManager() : logLevel_(SPDLOG_LEVEL) {

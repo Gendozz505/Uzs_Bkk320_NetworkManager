@@ -9,8 +9,6 @@
 #include <boost/program_options.hpp>
 #include <csignal>
 #include <iostream>
-#include <memory>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace po = boost::program_options;
 namespace net = boost::asio;

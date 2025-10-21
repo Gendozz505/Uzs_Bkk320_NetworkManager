@@ -1,6 +1,4 @@
 #include "TcpSession.hpp"
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <sstream>
 #include <utility>
 
 static std::atomic<uint64_t> nextSessionId_ = 1;

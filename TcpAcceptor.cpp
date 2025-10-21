@@ -1,6 +1,5 @@
 #include "TcpAcceptor.hpp"
 #include "TcpSession.hpp"
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 TcpAcceptor::TcpAcceptor(boost::asio::io_context& io, const boost::asio::ip::tcp::endpoint& endpoint)
     : acceptor_(io), running_(false) {

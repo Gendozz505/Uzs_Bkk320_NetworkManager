@@ -3,7 +3,7 @@
 #include <cstring>
 #include <spdlog/spdlog.h>
 
-MessageParser::MessageParser() { spdlog::debug("[MessageParser] Initialized"); }
+MessageParser::MessageParser() {}
 
 void MessageParser::parseData(const std::vector<uint8_t> &data) {
   if (data.size() < MESSAGE_MIN_SIZE) {
