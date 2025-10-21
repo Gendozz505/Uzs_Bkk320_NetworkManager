@@ -49,24 +49,12 @@ void MessageManager::processCommand_(const NetMessage &message) {
 }
 
 void MessageManager::ipRequestHandler_(const NetMessage &message) {
-  spdlog::debug("[MessageManager] Processing IP request from serial: {}",
-                message.serialNumber);
+  spdlog::debug("[MessageManager] Processing IP request");
 
   // Validate network configuration
   std::string ipAddress = getIpAddress();
-  if (ipAddress.empty()) {
-    throw std::runtime_error("No valid IP address found");
-  }
-
   std::string mask = getMask();
-  // if (mask.empty()) {
-  //   throw std::runtime_error("No valid mask found");
-  // }
-
   uint16_t serialNumber = getSerialNumber();
-  if (serialNumber == 0) { // Fixed: uint16_t can't be < 0
-    throw std::runtime_error("Serial number not found");
-  }
 
   // Prepare response message
   uint8_t status = 0x00;
@@ -85,17 +73,17 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   uint8_t *pBuffer = buffer.data();
   size_t offset = 0;
 
-  // CMD (1 byte) - little endian (single byte, no conversion needed)
+  // CMD
   pBuffer[offset++] = CMD_IP_RESPONSE;
 
   // Serial Number (2 bytes, little endian)
   pBuffer[offset++] = static_cast<uint8_t>(serialNumber & 0xFF);
   pBuffer[offset++] = static_cast<uint8_t>((serialNumber >> 8) & 0xFF); // MSB second
 
-  // Status (1 byte) - little endian (single byte, no conversion needed)
+  // Status
   pBuffer[offset++] = status;
 
-  // Data Length (4 bytes, little endian)
+  // Data Length
   uint32_t payloadSize = static_cast<uint32_t>(payloadString.size());
   pBuffer[offset++] = static_cast<uint8_t>(payloadSize & 0xFF);
   pBuffer[offset++] = static_cast<uint8_t>((payloadSize >> 8) & 0xFF);
@@ -109,9 +97,9 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   // Calculate CRC16 for all data except CRC field itself
   uint16_t crc = calculateCRC16(pBuffer, offset);
 
-  // CRC16 (2 bytes, little endian)
-  pBuffer[offset++] = static_cast<uint8_t>((crc >> 8) & 0xFF);
+  // CRC16
   pBuffer[offset++] = static_cast<uint8_t>(crc & 0xFF);       
+  pBuffer[offset++] = static_cast<uint8_t>((crc >> 8) & 0xFF);
 
   // Signal the message is ready to be sent via UDP
   sendUdpMessage(buffer);

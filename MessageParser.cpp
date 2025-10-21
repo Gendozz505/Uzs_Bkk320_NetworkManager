@@ -39,17 +39,17 @@ NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
   message.cmd = data[offset++];
 
   // Parse SERIAL NUMBER
-  message.serialNumber = (static_cast<uint16_t>(data[offset++]) << 8) |
-                         static_cast<uint16_t>(data[offset++]);
+  message.serialNumber = static_cast<uint16_t>(data[offset++]) |
+                         (static_cast<uint16_t>(data[offset++] << 8));
 
   // Parse STATUS
   message.status = data[offset++];
 
   // Parse DATALEN
-  message.dataLen = (static_cast<uint32_t>(data[offset++]) << 24) |
-                    (static_cast<uint32_t>(data[offset++]) << 16) |
+  message.dataLen = static_cast<uint32_t>(data[offset++]) |
                     (static_cast<uint32_t>(data[offset++]) << 8) |
-                    static_cast<uint32_t>(data[offset++]);
+                    (static_cast<uint32_t>(data[offset++]) << 16) |
+                    (static_cast<uint32_t>(data[offset++] << 24));
 
   // Extract data payload
   if (offset + message.dataLen <= data.size()) {
@@ -61,8 +61,8 @@ NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
   }
 
   // Parse CRC16
-  message.crc = (static_cast<uint16_t>(data[offset++]) << 8) |
-                static_cast<uint16_t>(data[offset++]);
+  message.crc = (static_cast<uint32_t>(data[offset++])) |
+                static_cast<uint32_t>(data[offset++] << 8);
 
   return message;
 }
@@ -75,10 +75,8 @@ bool MessageParser::validateMessage_(const NetMessage &message,
     return false;
   }
 
-  // Calculate CRC16 for the entire message except the CRC16 field itself
-  // std::vector<uint8_t> dataForCrc(rawData.begin(), rawData.end() - 2);
-  std::vector<uint8_t> dataForCrc(rawData.begin(), rawData.end() - 2);
-  uint16_t calculatedCrc = calculateCRC16(dataForCrc);
+  uint16_t calculatedCrc =
+      calculateCRC16(rawData.data(), rawData.size() - sizeof(NetMessage::crc));
 
   if (calculatedCrc != message.crc) {
     spdlog::warn(
