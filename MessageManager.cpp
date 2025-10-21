@@ -3,6 +3,8 @@
 #include "MessageParser.hpp"
 #include <cstdint>
 #include <spdlog/spdlog.h>
+#include <sys/types.h>
+#include <vector>
 
 #define CMD_IP_REQUEST 0xF6
 #define CMD_IP_RESPONSE 0xF7
@@ -53,8 +55,9 @@ void MessageManager::processCommand_(const NetMessage &message) {
 }
 
 void MessageManager::ipRequestHandler_(const NetMessage &message) {
+  
+  // Prepare response message
   uint8_t status = 0x00;
-
   json payload;
   payload["Version"] = "0.0.0.0";
   payload["Type"] = "Bkk320";
@@ -65,15 +68,13 @@ void MessageManager::ipRequestHandler_(const NetMessage &message) {
   std::string payloadString = payload.dump();
   std::vector<uint8_t> payloadBytes(payloadString.begin(), payloadString.end());
 
-  uint16_t crc = calculateCRC16(payloadBytes);
-
   NetMessage response;
   response.cmd = CMD_IP_RESPONSE;
   response.serialNumber = getSerialNumber();
   response.status = status;
   response.dataLen = static_cast<uint32_t>(payloadBytes.size());
   response.payload = payloadBytes;
-  response.crc = crc;
+  response.crc = calculateCRC16(response);
 
   // Send response message
   sendUdpMessage(response);
