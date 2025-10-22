@@ -8,7 +8,7 @@
 
 using json = nlohmann::json;
 
-enum class Command : uint8_t {
+enum Command : uint8_t {
   IP_REQUEST = 0xF6,
   IP_RESPONSE = 0xF7,
 };
@@ -42,7 +42,7 @@ void MessageManager::validateMessage_(const Common::NetMessage &message) {
 
 void MessageManager::processCommand_(const Common::NetMessage &message) {
   switch (message.cmd) {
-  case Command::CMD_IP_REQUEST: {
+  case Command::IP_REQUEST: {
     ipRequestHandler_(message);
     break;
   }
@@ -79,7 +79,7 @@ void MessageManager::ipRequestHandler_(const Common::NetMessage &message) {
   size_t offset = 0;
 
   // CMD
-  pBuffer[offset++] = Command::CMD_IP_RESPONSE;
+  pBuffer[offset++] = Command::IP_RESPONSE;
 
   // Serial Number
   pBuffer[offset++] = static_cast<uint8_t>(serialNumber & 0xFF);
