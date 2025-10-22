@@ -17,7 +17,7 @@ std::string Bkk32Info::getMainCfgPath() {
 uint16_t Bkk32Info::getSerialNumber() {
   try {
     json j;
-    int serialNumber;
+    uint16_t serialNumber;
 
     std::ifstream file(mainCfgPath_);
     if (!file.is_open()) {
