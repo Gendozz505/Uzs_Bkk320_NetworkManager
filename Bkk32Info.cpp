@@ -19,9 +19,9 @@ uint16_t Bkk32Info::getSerialNumber() {
     json j;
     int serialNumber;
 
-    std::ifstream file(getMainCfgPath());
+    std::ifstream file(mainCfgPath_);
     if (!file.is_open()) {
-      spdlog::error("[Bkk32Info] Failed to open file: {}", getMainCfgPath());
+      spdlog::error("[Bkk32Info] Failed to open file: {}", mainCfgPath_);
       return 0;
     }
 

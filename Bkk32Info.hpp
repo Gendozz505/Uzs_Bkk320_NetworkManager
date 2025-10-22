@@ -2,7 +2,7 @@
 
 #include <string>
 
-#define BKK32_DEFAULT_MAIN_CFG_FILE "/opt/Sensor-M/Bkk320/etc/MainCfg.json"
+#define BKK32_DEFAULT_MAIN_CFG_PATH "/opt/Sensor-M/Bkk320/data/MainCfg.saved.json"
 
 class Bkk32Info {
 public:

@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   desc.add_options()
     ("help,h", "Display help message")
     ("port,p", po::value<unsigned short>()->default_value(30720),"The port to listen on (e.g. 30720)")
-    ("main-cfg-file,m", po::value<std::string>()->default_value(BKK32_DEFAULT_MAIN_CFG_FILE),"Path to main configuration file");
+    ("main-cfg-file,m", po::value<std::string>()->default_value(BKK32_DEFAULT_MAIN_CFG_PATH),"Path to main configuration file");
 
   // Parse command-line arguments
   po::variables_map vm;
