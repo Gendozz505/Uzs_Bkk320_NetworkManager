@@ -166,6 +166,7 @@ set -e
 # Enable and start the service
 systemctl daemon-reload
 systemctl enable uzs-bkk320-network-manager.service
+systemctl start uzs-bkk320-network-manager.service
 
 # Create log directory with proper permissions
 mkdir -p /opt/Sensor-M/Bkk320/etc/networkManager
@@ -212,7 +213,7 @@ case "\$1" in
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
         ;;
     *)
-        echo "postrm called with unknown argument \`\$1'" >&2
+        echo "postrm called with unknown argument '\$1'" >&2
         exit 1
         ;;
 esac
@@ -236,11 +237,11 @@ build_deb_package() {
         
         # Show package info
         log_info "Package information:"
-        dpkg-deb --info "$PROJECT_ROOT/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
+        dpkg-deb --info "$PROJECT_ROOT/debs/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
         
         # Show package contents
         log_info "Package contents:"
-        dpkg-deb --contents "$PROJECT_ROOT/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
+        dpkg-deb --contents "$PROJECT_ROOT/debs/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
     else
         log_error "Failed to create .deb package"
         exit 1
