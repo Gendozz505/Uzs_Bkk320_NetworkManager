@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Common.hpp"
-
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 #include <array>
-#include <memory>
 
 class UdpSocket {
 public:
@@ -18,12 +15,12 @@ public:
   void startReceive();
   void stop();
   
-  // Set parser and message manager
-  void sendMessage(const std::vector<uint8_t> &buffer);
+  // Send UDP message
+  void onSend(const std::vector<uint8_t> &buffer);
 
 private:
   void doReceive_();
-  void doSend_(std::size_t length);
+  void doSend_(const std::vector<uint8_t> &buffer);
 
 private:
   boost::asio::ip::udp::socket socket_;

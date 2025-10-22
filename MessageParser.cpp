@@ -51,7 +51,9 @@ MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
                     (static_cast<uint32_t>(data[offset++] << 24));
 
   // Extract data payload
-  if (offset + message.dataLen <= data.size()) {
+  if (offset + message.dataLen <= data.size() - sizeof(Common::NetMessage::crc)) {
+    // Reverse the payload data
+    message.payload.resize(message.dataLen);
     for (int i = (message.dataLen - 1); i >= 0; i--) {
       message.payload[i] = data[offset++];
     }

@@ -1,15 +1,19 @@
 #include "MessageManager.hpp"
-#include "Bkk32Info.hpp"
+#include <nlohmann/json.hpp>
 #include <cstdint>
 #include <cstring>
 #include <spdlog/spdlog.h>
 #include <sys/types.h>
 #include <vector>
 
+using json = nlohmann::json;
+
 #define CMD_IP_REQUEST 0xF6
 #define CMD_IP_RESPONSE 0xF7
 
-MessageManager::MessageManager() {
+MessageManager::MessageManager(const std::string &mainCfgFile) {
+    // Set main configuration file path
+    bkk32Info_.setMainCfgPath(mainCfgFile);
 }
 
 void MessageManager::processMessage(const Common::NetMessage &message) {
@@ -53,7 +57,7 @@ void MessageManager::ipRequestHandler_(const Common::NetMessage &message) {
   // Validate network configuration
   std::string ipAddress = Common::getIpAddress();
   std::string mask = Common::getMask();
-  uint16_t serialNumber = Bkk32Info::getSerialNumber();
+  uint16_t serialNumber = bkk32Info_.getSerialNumber();
 
   // Prepare response message
   uint8_t status = 0x00;
