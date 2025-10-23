@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   desc.add_options()
     ("help,h", "Display help message")
     ("port,p", po::value<unsigned short>()->default_value(30720),"The port to listen on (e.g. 30720)")
+    ("log-level,l", po::value<std::string>()->default_value("info"),"The log level (e.g. trace, debug, info, warn, error, critical)")
     ("main-cfg-file,m", po::value<std::string>()->default_value(BKK32_DEFAULT_MAIN_CFG_PATH),"Path to main configuration file");
 
   // Parse command-line arguments
@@ -38,12 +39,13 @@ int main(int argc, char **argv) {
   }
 
   unsigned short port = vm["port"].as<unsigned short>();
+  std::string logLevel = vm["log-level"].as<std::string>();
   std::string mainCfgFile = vm["main-cfg-file"].as<std::string>();
 
   try {
     boost::asio::io_context io;
 
-    SpdlogManager spdlog;
+    SpdlogManager spdlog(logLevel);
 
     net::ip::tcp::endpoint ep{net::ip::tcp::v4(), port};
     TcpAcceptor acceptor(io, ep);

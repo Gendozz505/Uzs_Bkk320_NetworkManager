@@ -36,7 +36,6 @@ void MessageManager::processMessage(Common::NetMessage &&message, boost::asio::i
 }
 
 void MessageManager::validateMessage_(const Common::NetMessage &message) {
-  // Basic validation checks
   if (message.dataLen != message.payload.size()) {
     throw std::runtime_error("Data length mismatch");
   }

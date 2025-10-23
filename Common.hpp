@@ -8,10 +8,6 @@
 #include <type_traits>
 #include <vector>
 
-#ifndef SPDLOG_LEVEL
-#define SPDLOG_LEVEL "info" // Can be overridden by the Makefile
-#endif
-
 #define MESSAGE_MIN_SIZE 10
 
 namespace Common {

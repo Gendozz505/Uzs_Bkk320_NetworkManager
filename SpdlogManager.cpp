@@ -1,7 +1,7 @@
 #include "SpdlogManager.hpp"
 #include <string>
 
-SpdlogManager::SpdlogManager() : logLevel_(SPDLOG_LEVEL) {
+SpdlogManager::SpdlogManager(const std::string &logLevel) : logLevel_(logLevel) {
 }
 
 void SpdlogManager::init() {
