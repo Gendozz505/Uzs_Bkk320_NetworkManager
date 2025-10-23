@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
     net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
     UdpSocket udp(io, uep);
 
-    MessageParser parser;
-    MessageManager messageManager(mainCfgFile);
+    MessageParser parser(io);
+    MessageManager messageManager(io, mainCfgFile);
 
     // Setup signal handling for graceful shutdown
     boost::asio::signal_set signals(io, SIGINT, SIGTERM);
@@ -62,22 +62,27 @@ int main(int argc, char **argv) {
       udp.stop();
       io.stop();
     });
+    
+    // Connect UDP socket's onUdpReceived signal to parser's parseData method
+    udp.onUdpReceived.connect([&parser](const std::vector<uint8_t> &data, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      boost::asio::post(parser.getStrand(), [&parser, data, remoteEndpoint]() {
+        parser.parseData(std::move(const_cast<std::vector<uint8_t>&>(data)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
+      });
+    });
 
     // Connect parser signals to message manager
-    parser.messageParsed.connect([&messageManager](const Common::NetMessage &message) {
-      messageManager.processMessage(message);
+    parser.onMessageParsed.connect([&messageManager](const Common::NetMessage &message, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      boost::asio::post(messageManager.getStrand(), [&messageManager, message, remoteEndpoint]() {
+        messageManager.processMessage(std::move(const_cast<Common::NetMessage&>(message)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
+      });
     });
-
-    // Connect UDP socket's udpMessageReceived signal to parser's parseData
-    // method
-    udp.udpMessageReceived.connect([&parser](const std::vector<uint8_t> &message) {
-      parser.parseData(message);
-    });
-
+    
     // Connect message manager's sendUdpMessage signal to UDP socket's
     // onSend method
-    messageManager.sendUdpMessage.connect([&udp](const std::vector<uint8_t> &buffer) { 
-      udp.onSend(buffer); 
+    messageManager.onUdpReadyToSend.connect([&udp](const std::vector<uint8_t> &data, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      boost::asio::post(udp.getStrand(), [&udp, data, remoteEndpoint]() {
+        udp.onSend(std::move(const_cast<std::vector<uint8_t>&>(data)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
+      });
     });
 
     spdlog.init();

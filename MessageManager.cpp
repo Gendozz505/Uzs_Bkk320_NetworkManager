@@ -13,24 +13,26 @@ enum Command : uint8_t {
   IP_RESPONSE = 0xF7,
 };
 
-MessageManager::MessageManager(const std::string &mainCfgFile) {
+MessageManager::MessageManager(boost::asio::io_context &ioContext, const std::string &mainCfgFile) : strand_(boost::asio::make_strand(ioContext)) {
     // Set main configuration file path
     bkk32Info_.setMainCfgPath(mainCfgFile);
 }
 
-void MessageManager::processMessage(const Common::NetMessage &message) {
+void MessageManager::processMessage(Common::NetMessage &&message, boost::asio::ip::udp::endpoint &&remoteEndpoint) {
   try {
+  
     validateMessage_(message);
-    processCommand_(message);
+
+    std::vector<uint8_t> response;
+    processCommand_(message.cmd, response);
+
+    // Signal the message is ready to be sent via UDP
+    onUdpReadyToSend(response, remoteEndpoint);
 
   } catch (const std::exception &e) {
     std::string error = std::string("Message processing failed: ") + e.what();
     spdlog::error("[MessageManager] {}", error);
   }
-}
-
-void MessageManager::handleParseError(const std::string &error) {
-  spdlog::error("[MessageManager] Parse error: {}", error);
 }
 
 void MessageManager::validateMessage_(const Common::NetMessage &message) {
@@ -40,20 +42,20 @@ void MessageManager::validateMessage_(const Common::NetMessage &message) {
   }
 }
 
-void MessageManager::processCommand_(const Common::NetMessage &message) {
-  switch (message.cmd) {
+void MessageManager::processCommand_(uint8_t &cmd, std::vector<uint8_t> &response) {
+  switch (cmd) {
   case Command::IP_REQUEST: {
-    ipRequestHandler_(message);
+    ipRequestHandler_(response);
     break;
   }
   default: {
-    spdlog::warn("[MessageManager] Unknown command: 0x{:02X}", message.cmd);
+    spdlog::warn("[MessageManager] Unknown command: 0x{:02X}", cmd);
     break;
   }
   }
 }
 
-void MessageManager::ipRequestHandler_(const Common::NetMessage &message) {
+void MessageManager::ipRequestHandler_(std::vector<uint8_t> &response) {
   spdlog::debug("[MessageManager] Processing IP request");
 
   // Validate network configuration
@@ -74,38 +76,35 @@ void MessageManager::ipRequestHandler_(const Common::NetMessage &message) {
   spdlog::debug("[MessageManager] Response payload: {}", payloadString);
 
   const size_t bufferSize = MESSAGE_MIN_SIZE + payloadString.size();
-  std::vector<uint8_t> buffer(bufferSize);
-  uint8_t *pBuffer = buffer.data();
+  response.resize(bufferSize);
+  uint8_t *pResponse = response.data();
   size_t offset = 0;
 
   // CMD
-  pBuffer[offset++] = Command::IP_RESPONSE;
+  pResponse[offset++] = Command::IP_RESPONSE;
 
   // Serial Number
-  pBuffer[offset++] = static_cast<uint8_t>(serialNumber & 0xFF);
-  pBuffer[offset++] = static_cast<uint8_t>((serialNumber >> 8) & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>(serialNumber & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>((serialNumber >> 8) & 0xFF);
 
   // Status
-  pBuffer[offset++] = status;
+  pResponse[offset++] = status;
 
   // Data Length
   uint32_t payloadSize = static_cast<uint32_t>(payloadString.size());
-  pBuffer[offset++] = static_cast<uint8_t>(payloadSize & 0xFF);
-  pBuffer[offset++] = static_cast<uint8_t>((payloadSize >> 8) & 0xFF);
-  pBuffer[offset++] = static_cast<uint8_t>((payloadSize >> 16) & 0xFF);
-  pBuffer[offset++] = static_cast<uint8_t>((payloadSize >> 24) & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>(payloadSize & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>((payloadSize >> 8) & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>((payloadSize >> 16) & 0xFF);
+  pResponse[offset++] = static_cast<uint8_t>((payloadSize >> 24) & 0xFF);
 
   // Payload
-  memcpy(pBuffer + offset, payloadString.data(), payloadString.size());
+  memcpy(pResponse + offset, payloadString.data(), payloadString.size());
   offset += payloadString.size();
 
   // Calculate CRC16 for all data except CRC field itself
-  uint16_t crc = Common::calculateCRC16(pBuffer, offset);
+  uint16_t crc = Common::calculateCRC16(pResponse, offset);
 
   // CRC16
-  pBuffer[offset++] = static_cast<uint8_t>(crc & 0xFF);       
-  pBuffer[offset++] = static_cast<uint8_t>((crc >> 8) & 0xFF);
-
-  // Signal the message is ready to be sent via UDP
-  sendUdpMessage(buffer);
+  pResponse[offset++] = static_cast<uint8_t>(crc & 0xFF);       
+  pResponse[offset++] = static_cast<uint8_t>((crc >> 8) & 0xFF);
 }

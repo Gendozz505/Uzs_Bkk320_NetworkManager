@@ -3,11 +3,11 @@
 #include <cstring>
 #include <spdlog/spdlog.h>
 
-MessageParser::MessageParser() {}
+MessageParser::MessageParser(boost::asio::io_context &ioContext) : strand_(boost::asio::make_strand(ioContext)) {}
 
-void MessageParser::parseData(const std::vector<uint8_t> &data) {
+void MessageParser::parseData(std::vector<uint8_t> &&data, boost::asio::ip::udp::endpoint &&remoteEndpoint) {
   if (data.size() < MESSAGE_MIN_SIZE) {
-    parseError("Message too short");
+    onParseFailed("Message too short");
     return;
   }
 
@@ -20,17 +20,16 @@ void MessageParser::parseData(const std::vector<uint8_t> &data) {
           message.cmd, message.serialNumber, message.status, message.dataLen,
           Common::u8BytesToHex(message.payload.data(), message.payload.size()));
 
-      messageParsed(message);
+      onMessageParsed(message, remoteEndpoint);
     } else {
-      parseError("Message validation failed");
+      onParseFailed("Message validation failed");
     }
   } catch (const std::exception &e) {
-    parseError(std::string("Parse error: ") + e.what());
+    onParseFailed(std::string("Parse error: ") + e.what());
   }
 }
 
-Common::NetMessage
-MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
+Common::NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
   Common::NetMessage message;
   size_t offset = 0;
 

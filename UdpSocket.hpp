@@ -7,23 +7,26 @@
 class UdpSocket {
 public:
   // Signal emitted when a udp message is received
-  boost::signals2::signal<void(const std::vector<uint8_t>&)> udpMessageReceived;
+  boost::signals2::signal<void(const std::vector<uint8_t> &, const boost::asio::ip::udp::endpoint &)> onUdpReceived;
 
   UdpSocket(boost::asio::io_context &io,
             const boost::asio::ip::udp::endpoint &endpoint);
 
   void startReceive();
   void stop();
-  
+
+  boost::asio::strand<boost::asio::io_context::executor_type> getStrand() const { return strand_; }
+
   // Send UDP message
-  void onSend(const std::vector<uint8_t> &buffer);
+  void onSend(std::vector<uint8_t> &&data, boost::asio::ip::udp::endpoint &&remoteEndpoint);
 
 private:
   void doReceive_();
-  void doSend_(const std::vector<uint8_t> &buffer);
+  void doSend_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint);
 
 private:
   boost::asio::ip::udp::socket socket_;
+  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::asio::ip::udp::endpoint remoteEndpoint_;
   std::array<char, 4096> buffer_{};
   bool running_;
