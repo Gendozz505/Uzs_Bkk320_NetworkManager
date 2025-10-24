@@ -1,22 +1,22 @@
-#include "MessageParser.hpp"
+#include "DataParser.hpp"
 #include "Common.hpp"
 #include <cstring>
 #include <spdlog/spdlog.h>
 
-MessageParser::MessageParser(boost::asio::io_context &ioContext) : strand_(boost::asio::make_strand(ioContext)) {
+DataParser::DataParser(boost::asio::io_context &ioContext) : strand_(boost::asio::make_strand(ioContext)) {
   // Print error message on parse failed
   onParseFailed.connect([this](const std::string &error) {
-    spdlog::error("[MessageParser] Parse error: {}", error);
+    spdlog::error("[DataParser] Parse error: {}", error);
   });
 }
 
-void MessageParser::parseData(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+void DataParser::parseData(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
   boost::asio::post(strand_, [this, data = std::move(data), remoteEndpoint = std::move(remoteEndpoint)]() mutable {
     parseData_(data, remoteEndpoint);
   });
 }
 
-void MessageParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+void DataParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
   if (data.size() < MESSAGE_MIN_SIZE) {
     onParseFailed("Message too short");
     return;
@@ -27,7 +27,7 @@ void MessageParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp:
 
     if (validateMessage_(message, data)) {
       spdlog::trace(
-          "[MessageParser] Valid message parsed - CMD: {:#x}, SERIAL NUMBER: {}, STATUS: {:#x}, DATALEN: {}, PAYLOAD: {}",
+          "[DataParser] Valid message parsed - CMD: {:#x}, SERIAL NUMBER: {}, STATUS: {:#x}, DATALEN: {}, PAYLOAD: {}",
           message.cmd, message.serialNumber, message.status, message.dataLen,
           Common::u8BytesToHex(message.payload.data(), message.payload.size()));
 
@@ -40,7 +40,7 @@ void MessageParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp:
   }
 }
 
-Common::NetMessage MessageParser::dataToNetMessage_(const std::vector<uint8_t> &data) {
+Common::NetMessage DataParser::dataToNetMessage_(const std::vector<uint8_t> &data) {
   Common::NetMessage message;
   size_t offset = 0;
 
@@ -78,11 +78,11 @@ Common::NetMessage MessageParser::dataToNetMessage_(const std::vector<uint8_t> &
   return message;
 }
 
-bool MessageParser::validateMessage_(const Common::NetMessage &message,
+bool DataParser::validateMessage_(const Common::NetMessage &message,
                                      const std::vector<uint8_t> &rawData) {
   // Check if the message structure is valid
   if (rawData.size() < MESSAGE_MIN_SIZE + message.dataLen) {
-    spdlog::warn("[MessageParser] Message size mismatch");
+    spdlog::warn("[DataParser] Message size mismatch");
     return false;
   }
 
@@ -91,7 +91,7 @@ bool MessageParser::validateMessage_(const Common::NetMessage &message,
 
   if (calculatedCrc != message.crc) {
     spdlog::warn(
-        "[MessageParser] CRC16 mismatch - expected: {}, calculated: {}",
+        "[DataParser] CRC16 mismatch - expected: {}, calculated: {}",
         message.crc, calculatedCrc);
     return false;
   }

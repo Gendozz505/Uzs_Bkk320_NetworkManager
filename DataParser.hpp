@@ -6,9 +6,8 @@
 #include <string>
 #include "Common.hpp"
 #include <boost/asio.hpp>
-#include <queue>
 
-class MessageParser {
+class DataParser {
 public:
     // Signal emitted when a valid message is parsed
     boost::signals2::signal<void(Common::NetMessage&, boost::asio::ip::udp::endpoint&)> onMessageReady;
@@ -16,9 +15,9 @@ public:
     // Signal emitted when parsing fails
     boost::signals2::signal<void(const std::string&)> onParseFailed;
     
-    MessageParser(boost::asio::io_context &ioContext);
-    ~MessageParser() = default;
-    
+    DataParser(boost::asio::io_context &ioContext);
+    ~DataParser() = default;
+
     // Parse incoming UDP data
     void parseData(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint);
     

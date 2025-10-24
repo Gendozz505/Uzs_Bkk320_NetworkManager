@@ -1,5 +1,5 @@
 #include "MessageManager.hpp"
-#include "MessageParser.hpp"
+#include "DataParser.hpp"
 #include "SpdlogManager.hpp"
 #include "TcpAcceptor.hpp"
 #include "UdpSocket.hpp"
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
     UdpSocket udp(io, uep);
 
-    MessageParser parser(io);
+    DataParser parser(io);
     MessageManager messageManager(io, mainCfgFile);
 
     // Setup signal handling for graceful shutdown

@@ -19,7 +19,7 @@ This application provides a robust network management solution for BKK320 device
 
 - **TcpAcceptor/TcpSession**: Handle TCP connections and sessions
 - **UdpSocket**: Manages UDP communication
-- **MessageParser**: Parses incoming binary messages with validation
+- **DataParser**: Parses incoming binary messages with validation
 - **MessageManager**: Processes business logic and command handling
 - **Bkk32Info**: Manages device configuration and serial number retrieval
 - **SpdlogManager**: Centralized logging configuration
@@ -113,7 +113,7 @@ The application uses a JSON configuration file (`MainCfg.json`) containing:
 
 1. **TCP Message Handler Implementation**
    - Complete TCP message processing pipeline
-   - Integrate TCP sessions with MessageParser/MessageManager
+   - Integrate TCP sessions with DataParser/MessageManager
    - Add TCP-specific command handling
    - Implement session management and cleanup
 
