@@ -267,7 +267,7 @@ main() {
     create_postrm_script
     build_deb_package
 
-    git tag -a "${VERSION}"
+    git tag -a "${VERSION}" -m "Version ${VERSION}"
     
     log_info "Package creation completed successfully!"
     log_info "Install with: sudo dpkg -i ${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
