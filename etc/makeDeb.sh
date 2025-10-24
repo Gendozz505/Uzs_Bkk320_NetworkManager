@@ -69,7 +69,7 @@ check_target_binary() {
 build_target() {
     log_info "Building target binary..."
     cd "$PROJECT_ROOT"
-    make target
+    make target -j 8
     if [ $? -ne 0 ]; then
         log_error "Failed to build target binary"
         exit 1
@@ -266,6 +266,8 @@ main() {
     create_prerm_script
     create_postrm_script
     build_deb_package
+
+    git tag -a "${VERSION}"
     
     log_info "Package creation completed successfully!"
     log_info "Install with: sudo dpkg -i ${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
