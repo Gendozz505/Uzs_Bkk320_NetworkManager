@@ -6,8 +6,9 @@
 
 class SpdlogManager {
 public:
-  SpdlogManager(const std::string &logLevel);
-  void init();
+  SpdlogManager();
+  ~SpdlogManager();
+  void init(std::string &logLevel);
 
 private:
   std::string logLevel_;

@@ -9,9 +9,9 @@ public:
   // Signal emitted when a udp message is received
   boost::signals2::signal<void(std::vector<uint8_t> &, boost::asio::ip::udp::endpoint &)> onUdpDataReceived;
 
-  UdpSocket(boost::asio::io_context &io,
-            const boost::asio::ip::udp::endpoint &endpoint);
-
+  UdpSocket(boost::asio::io_context &io, const unsigned short &port);
+  ~UdpSocket() = default;
+  
   void startReceive();
   void stop();
 
@@ -33,6 +33,7 @@ private:
   std::array<char, 4096> buffer_{};
   bool running_;
   uint64_t sessionId_;
+  unsigned short port_;
 };
 
 

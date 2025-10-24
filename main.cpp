@@ -1,8 +1,5 @@
-#include "MessageManager.hpp"
-#include "DataParser.hpp"
-#include "SpdlogManager.hpp"
-#include "TcpAcceptor.hpp"
-#include "UdpSocket.hpp"
+#include "GlobalControl.hpp"
+#include "Bkk32Info.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/program_options.hpp>
@@ -10,7 +7,6 @@
 #include <iostream>
 
 namespace po = boost::program_options;
-namespace net = boost::asio;
 
 int main(int argc, char **argv) {
   // Define available options
@@ -38,63 +34,6 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  unsigned short port = vm["port"].as<unsigned short>();
-  std::string logLevel = vm["log-level"].as<std::string>();
-  std::string mainCfgFile = vm["main-cfg-file"].as<std::string>();
-
-  try {
-    boost::asio::io_context io;
-
-    SpdlogManager spdlog(logLevel);
-
-    net::ip::tcp::endpoint ep{net::ip::tcp::v4(), port};
-    TcpAcceptor acceptor(io, ep);
-
-    net::ip::udp::endpoint uep{net::ip::udp::v4(), port};
-    UdpSocket udp(io, uep);
-
-    DataParser parser(io);
-    MessageManager messageManager(io, mainCfgFile);
-
-    // Setup signal handling for graceful shutdown
-    boost::asio::signal_set signals(io, SIGINT, SIGTERM);
-    signals.async_wait([&](boost::system::error_code, int) {
-      spdlog::info("Shutdown signal received, stopping services...");
-      acceptor.stop();
-      udp.stop();
-      io.stop();
-    });
-    
-    // Connect UDP socket's onUdpDataReceived signal to parser's parseData method
-    udp.onUdpDataReceived.connect([&parser](std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      parser.parseData(data, remoteEndpoint);
-    });
-
-    // Connect parser signals to message manager
-    parser.onMessageReady.connect([&messageManager](Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      messageManager.processMessage(message, remoteEndpoint);
-    });
-    
-    // Connect message manager's sendUdpMessage signal to UDP socket's
-    // onSend method
-    messageManager.onUdpReadyToSend.connect([&udp](std::vector<uint8_t> &response, boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      udp.onSend(response, remoteEndpoint);
-    });
-
-    spdlog.init();
-    acceptor.startAccept();
-    udp.startReceive();
-
-    spdlog::info("Server listening on {}:{}", Common::getIpAddress(), port);
-
-    // Run the IO context - blocks until io.stop() is called
-    io.run();
-
-    // Cleanup after io.run() returns
-    spdlog::info("Server stopped");
-    return 0;
-  } catch (const std::exception &ex) {
-    spdlog::info("{}", ex.what());
-    return 1;
-  }
+  GlobalControl globalControl;
+  globalControl.start(vm);
 }

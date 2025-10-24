@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Common.hpp"
-
 #include <boost/asio.hpp>
-#include <memory>
 
 class TcpAcceptor {
 public:
-    TcpAcceptor(boost::asio::io_context& io, const boost::asio::ip::tcp::endpoint& endpoint);
+    TcpAcceptor(boost::asio::io_context& io, const unsigned short &port);
+    ~TcpAcceptor() = default;
 
     void startAccept();
     void stop();
@@ -18,6 +16,7 @@ private:
 private:
     boost::asio::ip::tcp::acceptor acceptor_;
     bool running_;
+    unsigned short port_;
 };
 
 

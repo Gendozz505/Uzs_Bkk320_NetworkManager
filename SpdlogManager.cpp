@@ -1,10 +1,12 @@
 #include "SpdlogManager.hpp"
 #include <string>
 
-SpdlogManager::SpdlogManager(const std::string &logLevel) : logLevel_(logLevel) {
-}
+SpdlogManager::SpdlogManager() {}
+SpdlogManager::~SpdlogManager() {}
 
-void SpdlogManager::init() {
+void SpdlogManager::init(std::string &logLevel) {
+
+  logLevel_ = logLevel;
 
   // Pattern with module name [%n]
   spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");

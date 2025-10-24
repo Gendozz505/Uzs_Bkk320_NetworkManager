@@ -2,8 +2,9 @@
 #include "TcpSession.hpp"
 
 TcpAcceptor::TcpAcceptor(boost::asio::io_context &io,
-                         const boost::asio::ip::tcp::endpoint &endpoint)
-    : acceptor_(io), running_(false) {
+                         const unsigned short &port)
+    : acceptor_(io), running_(false), port_(port) {
+  boost::asio::ip::tcp::endpoint endpoint{boost::asio::ip::tcp::v4(), port};
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);

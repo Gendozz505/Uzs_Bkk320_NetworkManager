@@ -6,9 +6,10 @@
 static std::atomic<uint64_t> nextSessionId_ = 1;
 
 UdpSocket::UdpSocket(boost::asio::io_context &io,
-                     const boost::asio::ip::udp::endpoint &endpoint)
+                     const unsigned short &port)
     : strand_(boost::asio::make_strand(io)), socket_(io), running_(false),
-      sessionId_(nextSessionId_++) {
+      sessionId_(nextSessionId_++), port_(port) {
+  boost::asio::ip::udp::endpoint endpoint{boost::asio::ip::udp::v4(), port};
   socket_.open(endpoint.protocol());
   socket_.set_option(boost::asio::socket_base::reuse_address(true));
   socket_.bind(endpoint);
