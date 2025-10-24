@@ -3,16 +3,27 @@
 #include <cstring>
 #include <spdlog/spdlog.h>
 
-MessageParser::MessageParser(boost::asio::io_context &ioContext) : strand_(boost::asio::make_strand(ioContext)) {}
+MessageParser::MessageParser(boost::asio::io_context &ioContext) : strand_(boost::asio::make_strand(ioContext)) {
+  // Print error message on parse failed
+  onParseFailed.connect([this](const std::string &error) {
+    spdlog::error("[MessageParser] Parse error: {}", error);
+  });
+}
 
-void MessageParser::parseData(std::vector<uint8_t> &&data, boost::asio::ip::udp::endpoint &&remoteEndpoint) {
+void MessageParser::parseData(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+  boost::asio::post(strand_, [this, data = std::move(data), remoteEndpoint = std::move(remoteEndpoint)]() mutable {
+    parseData_(data, remoteEndpoint);
+  });
+}
+
+void MessageParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
   if (data.size() < MESSAGE_MIN_SIZE) {
     onParseFailed("Message too short");
     return;
   }
 
   try {
-    Common::NetMessage message = parseMessage_(data);
+    Common::NetMessage message = dataToNetMessage_(data);
 
     if (validateMessage_(message, data)) {
       spdlog::trace(
@@ -20,7 +31,7 @@ void MessageParser::parseData(std::vector<uint8_t> &&data, boost::asio::ip::udp:
           message.cmd, message.serialNumber, message.status, message.dataLen,
           Common::u8BytesToHex(message.payload.data(), message.payload.size()));
 
-      onMessageParsed(message, remoteEndpoint);
+      onMessageReady(message, remoteEndpoint);
     } else {
       onParseFailed("Message validation failed");
     }
@@ -29,7 +40,7 @@ void MessageParser::parseData(std::vector<uint8_t> &&data, boost::asio::ip::udp:
   }
 }
 
-Common::NetMessage MessageParser::parseMessage_(const std::vector<uint8_t> &data) {
+Common::NetMessage MessageParser::dataToNetMessage_(const std::vector<uint8_t> &data) {
   Common::NetMessage message;
   size_t offset = 0;
 

@@ -65,26 +65,20 @@ int main(int argc, char **argv) {
       io.stop();
     });
     
-    // Connect UDP socket's onUdpReceived signal to parser's parseData method
-    udp.onUdpReceived.connect([&parser](const std::vector<uint8_t> &data, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      boost::asio::post(parser.getStrand(), [&parser, data, remoteEndpoint]() {
-        parser.parseData(std::move(const_cast<std::vector<uint8_t>&>(data)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
-      });
+    // Connect UDP socket's onUdpDataReceived signal to parser's parseData method
+    udp.onUdpDataReceived.connect([&parser](std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      parser.parseData(data, remoteEndpoint);
     });
 
     // Connect parser signals to message manager
-    parser.onMessageParsed.connect([&messageManager](const Common::NetMessage &message, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      boost::asio::post(messageManager.getStrand(), [&messageManager, message, remoteEndpoint]() {
-        messageManager.processMessage(std::move(const_cast<Common::NetMessage&>(message)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
-      });
+    parser.onMessageReady.connect([&messageManager](Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      messageManager.processMessage(message, remoteEndpoint);
     });
     
     // Connect message manager's sendUdpMessage signal to UDP socket's
     // onSend method
-    messageManager.onUdpReadyToSend.connect([&udp](const std::vector<uint8_t> &data, const boost::asio::ip::udp::endpoint &remoteEndpoint) {
-      boost::asio::post(udp.getStrand(), [&udp, data, remoteEndpoint]() {
-        udp.onSend(std::move(const_cast<std::vector<uint8_t>&>(data)), std::move(const_cast<boost::asio::ip::udp::endpoint&>(remoteEndpoint)));
-      });
+    messageManager.onUdpReadyToSend.connect([&udp](std::vector<uint8_t> &response, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+      udp.onSend(response, remoteEndpoint);
     });
 
     spdlog.init();

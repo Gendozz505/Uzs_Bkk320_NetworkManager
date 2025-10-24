@@ -11,7 +11,7 @@
 class MessageParser {
 public:
     // Signal emitted when a valid message is parsed
-    boost::signals2::signal<void(const Common::NetMessage&, const boost::asio::ip::udp::endpoint&)> onMessageParsed;
+    boost::signals2::signal<void(Common::NetMessage&, boost::asio::ip::udp::endpoint&)> onMessageReady;
     
     // Signal emitted when parsing fails
     boost::signals2::signal<void(const std::string&)> onParseFailed;
@@ -20,13 +20,16 @@ public:
     ~MessageParser() = default;
     
     // Parse incoming UDP data
-    void parseData(std::vector<uint8_t> &&data, boost::asio::ip::udp::endpoint &&remoteEndpoint);
-
+    void parseData(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint);
+    
     boost::asio::strand<boost::asio::io_context::executor_type> getStrand() const { return strand_; }
-        
+    
 private:
+    void parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint);
+    
     bool validateMessage_(const Common::NetMessage& message, const std::vector<uint8_t>& rawData);
-    Common::NetMessage parseMessage_(const std::vector<uint8_t>& data);
+    
+    Common::NetMessage dataToNetMessage_(const std::vector<uint8_t>& data);
 
     boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 };

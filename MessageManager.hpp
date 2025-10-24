@@ -8,17 +8,19 @@
 class MessageManager {
 public:
   // Signal to send UDP message
-  boost::signals2::signal<void(const std::vector<uint8_t> &, const boost::asio::ip::udp::endpoint &)> onUdpReadyToSend;
+  boost::signals2::signal<void(std::vector<uint8_t> &, boost::asio::ip::udp::endpoint &)> onUdpReadyToSend;
 
   MessageManager(boost::asio::io_context &ioContext, const std::string &mainCfgFile);
   ~MessageManager() = default;
 
   // Process incoming message
-  void processMessage(Common::NetMessage &&message, boost::asio::ip::udp::endpoint &&remoteEndpoint);
-
+  void processMessage(Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint);
+  
   boost::asio::strand<boost::asio::io_context::executor_type> getStrand() const { return strand_; }
+  
+  private:
+  void processMessage_(Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint);
 
-private:
   // Message processing logic
   void processCommand_(uint8_t &cmd, std::vector<uint8_t> &responseData);
   void ipRequestHandler_(std::vector<uint8_t> &responseData);

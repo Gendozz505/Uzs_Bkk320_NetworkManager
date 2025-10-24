@@ -14,13 +14,6 @@ UdpSocket::UdpSocket(boost::asio::io_context &io,
   socket_.bind(endpoint);
 }
 
-void UdpSocket::startReceive() {
-  if (running_)
-    return;
-  running_ = true;
-  doReceive_();
-}
-
 void UdpSocket::stop() {
   running_ = false;
   boost::system::error_code ec;
@@ -28,6 +21,13 @@ void UdpSocket::stop() {
   if (ec) {
     spdlog::warn("[UDP] Error closing socket: {}", ec.message());
   }
+}
+
+void UdpSocket::startReceive() {
+  if (running_)
+    return;
+  running_ = true;
+  doReceive_();
 }
 
 void UdpSocket::doReceive_() {
@@ -49,14 +49,39 @@ void UdpSocket::doReceive_() {
                 Common::u8BytesToHex(dataVector.data(), dataVector.size()));
 
             // Emit signal to parser
-            onUdpReceived(dataVector, remoteEndpoint_);
+            onUdpDataReceived(dataVector, remoteEndpoint_);
 
           } else if (ec) {
             stop();
           }
+
+          // Continue receiving
           doReceive_();
         });
   });
+}
+
+void UdpSocket::onSend(std::vector<uint8_t> &data,
+                       boost::asio::ip::udp::endpoint &remoteEndpoint) {
+  boost::asio::post(strand_,
+                    [this, data = std::move(data),
+                     remoteEndpoint = std::move(remoteEndpoint)]() mutable {
+                      onSend_(data, remoteEndpoint);
+                    });
+}
+
+void UdpSocket::onSend_(std::vector<uint8_t> &data,
+                        boost::asio::ip::udp::endpoint &remoteEndpoint) {
+  if (data.size() > buffer_.size()) {
+    spdlog::error("[UDP] Message too large to send: {} bytes (max: {})",
+                  data.size(), buffer_.size());
+    return;
+  }
+
+  spdlog::trace("[UDP] Sending {} bytes: {}", data.size(),
+                Common::u8BytesToHex(data.data(), data.size()));
+
+  doSend_(data, remoteEndpoint);
 }
 
 void UdpSocket::doSend_(std::vector<uint8_t> &data,
@@ -73,15 +98,4 @@ void UdpSocket::doSend_(std::vector<uint8_t> &data,
           spdlog::trace("[UDP] Sent {} bytes successfully", bytes);
         }
       });
-}
-
-void UdpSocket::onSend(std::vector<uint8_t> &&data,boost::asio::ip::udp::endpoint &&remoteEndpoint) {
-  if (data.size() > buffer_.size()) {
-    spdlog::error("[UDP] Message too large to send: {} bytes (max: {})", data.size(), buffer_.size());
-    return;
-  }
-  
-  spdlog::trace("[UDP] Sending {} bytes: {}", data.size(), Common::u8BytesToHex(data.data(), data.size()));
-  
-  doSend_(data, remoteEndpoint);
 }

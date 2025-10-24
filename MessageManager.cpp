@@ -18,9 +18,14 @@ MessageManager::MessageManager(boost::asio::io_context &ioContext, const std::st
     bkk32Info_.setMainCfgPath(mainCfgFile);
 }
 
-void MessageManager::processMessage(Common::NetMessage &&message, boost::asio::ip::udp::endpoint &&remoteEndpoint) {
+void MessageManager::processMessage(Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint) {
+  boost::asio::post(strand_, [this, message = std::move(message), remoteEndpoint = std::move(remoteEndpoint)]() mutable {
+    processMessage_(message, remoteEndpoint);
+  });
+}
+
+void MessageManager::processMessage_(Common::NetMessage &message, boost::asio::ip::udp::endpoint &remoteEndpoint) {
   try {
-  
     validateMessage_(message);
 
     std::vector<uint8_t> response;
@@ -61,15 +66,15 @@ void MessageManager::ipRequestHandler_(std::vector<uint8_t> &response) {
   std::string ipAddress = Common::getIpAddress();
   std::string mask = Common::getMask();
   uint16_t serialNumber = bkk32Info_.getSerialNumber();
-
-  // Prepare response message
   uint8_t status = 0x00;
+
+  // Prepare response payload
   json payload;
   payload["Version"] = "0.0.0.0";
   payload["Type"] = "Bkk320";
   payload["IP"] = ipAddress;
   payload["MASK"] = mask;
-  payload["MODE"] = 1;
+  payload["MODE"] = 1; // Боевой режим
 
   std::string payloadString = payload.dump();
   spdlog::debug("[MessageManager] Response payload: {}", payloadString);
