@@ -1,8 +1,10 @@
 #include "MessageManager.hpp"
 #include <nlohmann/json.hpp>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <sys/types.h>
 #include <vector>
 
@@ -67,10 +69,17 @@ void MessageManager::ipRequestHandler_(std::vector<uint8_t> &response) {
   std::string mask = Common::getMask();
   uint16_t serialNumber = bkk32Info_.getSerialNumber();
   uint8_t status = 0x00;
+  
+  // Get version string
+  char buffer[128] = {0};
+  FILE* pipe = popen("dpkg -s bkkservice320-1.1.0.0 2>/dev/null | grep '^Version:' | cut -d' ' -f2", "r");
+  std::string version = (pipe && fgets(buffer, sizeof(buffer), pipe)) ? std::string(buffer) : "unknown";
+  if (pipe) pclose(pipe);
+  if (!version.empty()) version.erase(version.find_last_not_of(" \n\r\t")+1); // trim whitespace
 
   // Prepare response payload
   json payload;
-  payload["Version"] = "0.0.0.0";
+  payload["Version"] = version;
   payload["Type"] = "Bkk320";
   payload["IP"] = ipAddress;
   payload["MASK"] = mask;
