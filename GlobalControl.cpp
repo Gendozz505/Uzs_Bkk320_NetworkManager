@@ -70,10 +70,10 @@ void GlobalControl::bindSignals_() {
         messageManager_->processMessage(message, remoteEndpoint);
       });
 
-  // Connect onUdpReadyToSend to udpSocket_->onSend()
+  // Connect onUdpReadyToSend to udpSocket_->doSend()
   messageManager_->onUdpReadyToSend.connect(
       [this](std::vector<uint8_t> &response,
              boost::asio::ip::udp::endpoint &remoteEndpoint) {
-        udpSocket_->onSend(response, remoteEndpoint);
+        udpSocket_->doSend(response, remoteEndpoint);
       });
 }

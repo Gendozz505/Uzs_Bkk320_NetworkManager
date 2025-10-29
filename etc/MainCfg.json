@@ -1,6 +1,6 @@
 {
      "this":{"ver":[1,3], "name":"maincfg"}
-     , "SerNumb":13462
+     , "SerNumb":1
      , "CryptoProtocol":true 
      , "AGroups":{"1":1 }
      , "TimeSlotDuration":1000
