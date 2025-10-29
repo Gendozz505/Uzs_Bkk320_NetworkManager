@@ -48,17 +48,19 @@ Common::NetMessage DataParser::dataToNetMessage_(const std::vector<uint8_t> &dat
   message.cmd = data[offset++];
 
   // Parse SERIAL NUMBER
-  message.serialNumber = static_cast<uint16_t>(data[offset++]) |
-                         (static_cast<uint16_t>(data[offset++] << 8));
+  message.serialNumber = static_cast<uint16_t>(data[offset]);
+  message.serialNumber |= (static_cast<uint16_t>(data[offset + 1]) << 8);
+  offset += 2;
 
   // Parse STATUS
   message.status = data[offset++];
 
   // Parse DATALEN
-  message.payloadLength = static_cast<uint32_t>(data[offset++]) |
-                    (static_cast<uint32_t>(data[offset++]) << 8) |
-                    (static_cast<uint32_t>(data[offset++]) << 16) |
-                    (static_cast<uint32_t>(data[offset++] << 24));
+  message.payloadLength = static_cast<uint32_t>(data[offset]);
+  message.payloadLength |= (static_cast<uint32_t>(data[offset + 1]) << 8);
+  message.payloadLength |= (static_cast<uint32_t>(data[offset + 2]) << 16);
+  message.payloadLength |= (static_cast<uint32_t>(data[offset + 3]) << 24);
+  offset += 4;
 
   // Extract data payload
   if (offset + message.payloadLength <= data.size() - sizeof(Common::NetMessage::crc)) {
@@ -72,8 +74,9 @@ Common::NetMessage DataParser::dataToNetMessage_(const std::vector<uint8_t> &dat
   }
 
   // Parse CRC16
-  message.crc = (static_cast<uint32_t>(data[offset++])) |
-                static_cast<uint32_t>(data[offset++] << 8);
+  message.crc = static_cast<uint32_t>(data[offset]);
+  message.crc |= (static_cast<uint32_t>(data[offset + 1]) << 8);
+  offset += 2;
 
   return message;
 }
