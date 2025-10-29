@@ -27,8 +27,8 @@ void DataParser::parseData_(std::vector<uint8_t> &data, boost::asio::ip::udp::en
 
     if (validateMessage_(message, data)) {
       spdlog::trace(
-          "[DataParser] Valid message parsed - CMD: {:#x}, SERIAL NUMBER: {}, STATUS: {:#x}, DATALEN: {}, PAYLOAD: {}",
-          message.cmd, message.serialNumber, message.status, message.dataLen,
+          "[DataParser] Valid message parsed - CMD: {:#x}, SERIAL NUMBER: {}, STATUS: {:#x}, DATALEN: {}, DATA: {}",
+          message.cmd, message.serialNumber, message.status, message.payloadLength,
           Common::u8BytesToHex(message.payload.data(), message.payload.size()));
 
       onMessageReady(message, remoteEndpoint);
@@ -55,16 +55,16 @@ Common::NetMessage DataParser::dataToNetMessage_(const std::vector<uint8_t> &dat
   message.status = data[offset++];
 
   // Parse DATALEN
-  message.dataLen = static_cast<uint32_t>(data[offset++]) |
+  message.payloadLength = static_cast<uint32_t>(data[offset++]) |
                     (static_cast<uint32_t>(data[offset++]) << 8) |
                     (static_cast<uint32_t>(data[offset++]) << 16) |
                     (static_cast<uint32_t>(data[offset++] << 24));
 
   // Extract data payload
-  if (offset + message.dataLen <= data.size() - sizeof(Common::NetMessage::crc)) {
+  if (offset + message.payloadLength <= data.size() - sizeof(Common::NetMessage::crc)) {
     // Reverse the payload data
-    message.payload.resize(message.dataLen);
-    for (int i = (message.dataLen - 1); i >= 0; i--) {
+    message.payload.resize(message.payloadLength);
+    for (int i = (message.payloadLength - 1); i >= 0; i--) {
       message.payload[i] = data[offset++];
     }
   } else {
@@ -81,7 +81,7 @@ Common::NetMessage DataParser::dataToNetMessage_(const std::vector<uint8_t> &dat
 bool DataParser::validateMessage_(const Common::NetMessage &message,
                                      const std::vector<uint8_t> &rawData) {
   // Check if the message structure is valid
-  if (rawData.size() < MESSAGE_MIN_SIZE + message.dataLen) {
+  if (rawData.size() < MESSAGE_MIN_SIZE + message.payloadLength) {
     spdlog::warn("[DataParser] Message size mismatch");
     return false;
   }
