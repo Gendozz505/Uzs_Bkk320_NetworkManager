@@ -23,7 +23,9 @@ public:
   private:
   void doReceive_();
   
+  // Send callback. Sents messages from queue until queue is empty.
   void handleSend_(boost::system::error_code ec, std::size_t bytes);
+
   void doSend_(std::vector<uint8_t> &data, boost::asio::ip::udp::endpoint &remoteEndpoint);
   
   private:
